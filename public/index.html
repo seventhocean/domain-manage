@@ -3,31 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Domain-Manage — 产品 & 域名管理面板</title>
+  <title>Domain-Manage — 产品 & 域名指挥中心</title>
+  <meta name="description" content="个人产品与域名管理系统：统一管理服务状态、域名到期与 Cloudflare DNS。">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><rect x='6' y='6' width='13' height='13' fill='%2376b900'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
 
+<a href="#main" class="skip-link">跳到主内容</a>
+
 <!-- ============================================================
-     SURFACE: Utility Bar (32px, dark)
+     SURFACE: Utility Bar
      ============================================================ -->
 <header class="utility-bar">
   <div class="status-dot">
-    <span id="cf-status-dot" class="dot red"></span>
+    <span id="cf-status-dot" class="dot red" aria-hidden="true"></span>
     <span id="cf-status-text">CF 未连接</span>
   </div>
-  <span id="sync-time" class="text-mute" style="color:var(--on-dark-mute)"></span>
-  <a href="#" onclick="openSettings()" style="color:var(--on-dark-mute);text-decoration:none;font-size:var(--fs-caption-sm)">设置</a>
+  <span id="sync-time" class="text-mute"></span>
+  <button type="button" onclick="openSettings()" aria-label="打开设置">设置</button>
 </header>
 
 <!-- ============================================================
-     SURFACE: Primary Nav (64px, dark)
+     SURFACE: Primary Nav
      ============================================================ -->
-<nav class="primary-nav">
-  <div class="logo">
-    <span class="corner-square"></span>
+<nav class="primary-nav" aria-label="主导航">
+  <button class="logo" type="button" onclick="navTo('overview')" aria-label="返回总览">
+    <span class="corner-square" aria-hidden="true"></span>
     Domain-Manage
-  </div>
+  </button>
   <ul class="nav-links">
     <li><a href="#" class="active" data-nav="overview" onclick="navTo('overview')">总览</a></li>
     <li><a href="#" data-nav="services" onclick="navTo('services')">服务</a></li>
@@ -35,126 +44,215 @@
     <li><a href="#" data-nav="dns" onclick="navTo('dns')">DNS</a></li>
   </ul>
   <div class="nav-right">
-    <button class="btn btn-outline-on-dark btn-sm" onclick="syncFromCloudflare()">同步 CF</button>
-    <button class="btn btn-primary btn-sm" id="btn-add-service-top" onclick="openServiceForm()">+ 添加服务</button>
+    <button class="btn btn-outline-on-dark btn-sm" type="button" onclick="syncFromCloudflare()">同步 CF</button>
+    <button class="btn btn-primary btn-sm" id="btn-add-service-top" type="button" onclick="openServiceForm()">+ 添加服务</button>
+    <button class="btn btn-primary btn-sm" id="btn-add-domain-top" type="button" onclick="openDomainForm()">+ 添加域名</button>
   </div>
+  <button class="nav-toggle" type="button" id="nav-toggle" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer" onclick="toggleDrawer()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
 </nav>
 
 <!-- ============================================================
-     VIEW: Overview (总览)
+     MOBILE DRAWER
+     ============================================================ -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-label="移动端导航" aria-hidden="true">
+  <div class="drawer-head">
+    <button class="logo" type="button" onclick="navTo('overview');closeDrawer()">
+      <span class="corner-square" aria-hidden="true"></span> Domain-Manage
+    </button>
+    <button class="drawer-close" type="button" aria-label="关闭菜单" onclick="closeDrawer()">✕</button>
+  </div>
+  <ul class="drawer-links">
+    <li><a href="#" data-nav="overview" onclick="navTo('overview');closeDrawer()">总览</a></li>
+    <li><a href="#" data-nav="services" onclick="navTo('services');closeDrawer()">服务</a></li>
+    <li><a href="#" data-nav="domains" onclick="navTo('domains');closeDrawer()">域名</a></li>
+    <li><a href="#" data-nav="dns" onclick="navTo('dns');closeDrawer()">DNS</a></li>
+  </ul>
+  <div class="drawer-actions">
+    <button class="btn btn-primary btn-block" type="button" onclick="openServiceForm();closeDrawer()">+ 添加服务</button>
+    <button class="btn btn-outline-on-dark btn-block" type="button" onclick="openDomainForm();closeDrawer()">+ 添加域名</button>
+  </div>
+</aside>
+
+<main id="main">
+
+<!-- ============================================================
+     VIEW: Overview
      ============================================================ -->
 <div id="view-overview">
 
-  <!-- Compact Stats Bar -->
-  <section style="background:var(--surface-dark);padding:40px var(--gutter)">
-    <div style="max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-xl)">
-      <div class="callout-stat" style="padding:var(--sp-xl)">
-        <div class="stat-number"><span id="stat-running">0</span><span style="font-size:var(--fs-heading-sm);color:var(--on-dark-mute)"> / </span><span id="stat-total-svc" style="color:var(--on-dark-mute)">0</span></div>
-        <div class="stat-label">服务 · 在线 / 总数</div>
+  <!-- Overview head + core stats -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">总览</div>
+          <h2 class="heading-xl">我的资产一览</h2>
+        </div>
       </div>
-      <div class="callout-stat" style="padding:var(--sp-xl)">
-        <div class="stat-number" id="stat-domains">0</div>
-        <div class="stat-label">域名总数 · <span id="stat-cf-inline" style="color:var(--primary)">0</span> CF 托管</div>
-      </div>
-      <div class="callout-stat" style="padding:var(--sp-xl)">
-        <div class="stat-number" id="stat-expiring" style="color:var(--warning-bright)">0</div>
-        <div class="stat-label">30天内到期 / SSL 预警</div>
-      </div>
-      <div class="callout-stat" style="padding:var(--sp-xl);display:flex;flex-direction:column;justify-content:center;gap:var(--sp-md)">
-        <button class="btn btn-outline-on-dark btn-sm" onclick="navTo('services')" style="width:100%">📦 服务管理</button>
-        <button class="btn btn-outline-on-dark btn-sm" onclick="navTo('domains')" style="width:100%">🌐 域名管理</button>
-        <button class="btn btn-outline-on-dark btn-sm" onclick="navTo('dns')" style="width:100%">☁️ DNS 记录</button>
+      <div class="stat-grid" id="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num"><span id="stat-running">0</span><span class="sub"> / <span id="stat-total-svc">0</span></span></div>
+          <div class="stat-label">服务 · 在线 / 总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span id="stat-domains">0</span></div>
+          <div class="stat-label">域名总数 · <span class="text-primary" id="stat-cf-inline">0</span> CF 托管</div>
+        </div>
+        <div class="stat-card alert">
+          <div class="stat-num" id="stat-expiring">0</div>
+          <div class="stat-label">域名 · 30天到期</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><span id="stat-maintenance">0</span></div>
+          <div class="stat-label">维护中服务</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Alerts + Status Breakdown one row -->
-  <section style="padding:var(--sp-xl) var(--gutter);background:var(--canvas)">
-    <div style="max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-xl)">
-      <div id="overview-alerts">
-        <p class="body-sm" style="color:var(--mute)">加载中…</p>
-      </div>
-      <div id="overview-status-breakdown">
-        <p class="body-sm" style="color:var(--mute)">加载中…</p>
+  <!-- Charts row 1: status + category -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">服务状态分布</span>
+            <span class="panel-sub" id="status-sub">—</span>
+          </div>
+          <div class="donut-wrap">
+            <div id="chart-status" class="donut" aria-hidden="true"></div>
+            <div class="legend" id="legend-status"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">分类分布</span>
+            <span class="panel-sub" id="category-sub">—</span>
+          </div>
+          <div class="bar-list" id="chart-category"></div>
+        </div>
       </div>
     </div>
   </section>
+
+  <!-- Expiry + attention -->
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">即将到期</span>
+            <span class="panel-sub">未来 90 天</span>
+          </div>
+          <div id="upcoming-list"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">需要关注</span>
+            <span class="panel-sub" id="alerts-sub">—</span>
+          </div>
+          <div id="overview-alerts"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- ============================================================
-     VIEW: Services (服务详情)
+     VIEW: Services
      ============================================================ -->
 <div id="view-services" class="hidden">
-  <div class="breadcrumb-bar">
-    <div class="inner"><a href="#" onclick="navTo('overview')" style="color:var(--body);text-decoration:none">总览</a> <span class="sep">›</span> 服务管理</div>
-  </div>
-  <section class="section" style="background:var(--canvas)">
+  <div class="breadcrumb-bar"><div class="inner"><a href="#" onclick="navTo('overview')">总览</a> <span class="sep">›</span> 服务管理</div></div>
+  <section class="section">
     <div class="container">
-      <div class="flex-between mb-xl">
+      <div class="section-head">
         <div>
-          <p class="caption-md" style="color:var(--mute);margin-bottom:var(--sp-xs)">服务管理</p>
-          <h2 class="heading-xl">所有服务 · 管理面板</h2>
-        </div>
-        <div style="display:flex;gap:var(--sp-md);align-items:center">
-          <input type="text" class="search-input" id="services-search" placeholder="搜索服务名称或域名…" oninput="searchServicesView()">
-          <button class="btn btn-primary" onclick="openServiceForm()">+ 添加服务</button>
+          <div class="eyebrow" style="font-size:var(--fs-caption-md);font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp-xs)">服务管理</div>
+          <h2 class="heading-xl">所有服务</h2>
         </div>
       </div>
-      <div class="pill-tab-group mb-xl">
-        <button class="pill-tab active" data-filter="all" onclick="filterServicesView('all', this)">全部</button>
-        <button class="pill-tab" data-filter="running" onclick="filterServicesView('running', this)">🟢 运行中</button>
-        <button class="pill-tab" data-filter="maintenance" onclick="filterServicesView('maintenance', this)">🟡 维护中</button>
-        <button class="pill-tab" data-filter="stopped" onclick="filterServicesView('stopped', this)">🔴 已停用</button>
+      <div class="toolbar mb-xl">
+        <input type="text" class="search-input" id="services-search" placeholder="搜索名称、URL 或描述…" oninput="searchServicesView()" aria-label="搜索服务">
+        <div class="pill-tab-group" role="tablist" aria-label="按状态筛选">
+          <button class="pill-tab active" data-filter="all" role="tab" aria-selected="true" onclick="filterServicesView('all', this)">全部</button>
+          <button class="pill-tab" data-filter="running" role="tab" aria-selected="false" onclick="filterServicesView('running', this)">运行中</button>
+          <button class="pill-tab" data-filter="maintenance" role="tab" aria-selected="false" onclick="filterServicesView('maintenance', this)">维护中</button>
+          <button class="pill-tab" data-filter="stopped" role="tab" aria-selected="false" onclick="filterServicesView('stopped', this)">已停用</button>
+        </div>
+        <div class="spacer"></div>
+        <select class="select-input" id="services-sort" onchange="sortServicesView(this.value)" aria-label="排序方式">
+          <option value="updated">最近更新</option>
+          <option value="name">名称 A→Z</option>
+          <option value="status">状态</option>
+          <option value="category">分类</option>
+        </select>
       </div>
-      <div id="service-cards-full" class="grid-4">
-        <!-- Populated by app.js -->
+      <div id="service-cards-full" class="grid-4"></div>
+      <div id="service-empty" class="empty-state hidden">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><path d="M7 7h.01M7 17h.01"/></svg>
+        <div class="empty-title">还没有服务</div>
+        <div class="empty-desc">添加你的第一个产品、网站或工具，记录它的运行状态与托管信息。</div>
+        <div class="empty-actions"><button class="btn btn-primary" type="button" onclick="openServiceForm()">+ 添加服务</button></div>
       </div>
     </div>
   </section>
 </div>
 
 <!-- ============================================================
-     VIEW: Domains (域名管理)
+     VIEW: Domains
      ============================================================ -->
 <div id="view-domains" class="hidden">
-  <div class="breadcrumb-bar">
-    <div class="inner"><a href="#" onclick="navTo('overview')" style="color:var(--body);text-decoration:none">总览</a> <span class="sep">›</span> 域名管理</div>
-  </div>
-  <section class="section" style="background:var(--canvas)">
+  <div class="breadcrumb-bar"><div class="inner"><a href="#" onclick="navTo('overview')">总览</a> <span class="sep">›</span> 域名管理</div></div>
+  <section class="section">
     <div class="container">
-      <div class="flex-between mb-xl">
+      <div class="section-head">
         <div>
-          <p class="caption-md" style="color:var(--mute);margin-bottom:var(--sp-xs)">域名管理</p>
+          <div class="eyebrow" style="font-size:var(--fs-caption-md);font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp-xs)">域名管理</div>
           <h2 class="heading-xl">全部域名</h2>
         </div>
-        <button class="btn btn-primary" onclick="openDomainForm()">+ 添加域名</button>
       </div>
-      <div id="domain-cards-full" class="grid-4">
-        <!-- Populated by app.js -->
+      <div class="toolbar mb-xl">
+        <input type="text" class="search-input" id="domains-search" placeholder="搜索域名…" oninput="searchDomainsView()" aria-label="搜索域名">
+        <div class="spacer"></div>
+        <select class="select-input" id="domains-sort" onchange="sortDomainsView(this.value)" aria-label="排序方式">
+          <option value="expiry">即将到期优先</option>
+          <option value="name">域名 A→Z</option>
+        </select>
+      </div>
+      <div id="domain-cards-full" class="grid-4"></div>
+      <div id="domain-empty" class="empty-state hidden">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <div class="empty-title">还没有域名</div>
+        <div class="empty-desc">添加你的第一个域名，跟踪注册到期；也可从 Cloudflare 一键同步。</div>
+        <div class="empty-actions"><button class="btn btn-primary" type="button" onclick="openDomainForm()">+ 添加域名</button></div>
       </div>
     </div>
   </section>
 </div>
 
 <!-- ============================================================
-     VIEW: DNS (Cloudflare DNS 记录)
+     VIEW: DNS
      ============================================================ -->
 <div id="view-dns" class="hidden">
-  <div class="breadcrumb-bar">
-    <div class="inner"><a href="#" onclick="navTo('overview')" style="color:var(--body);text-decoration:none">总览</a> <span class="sep">›</span> Cloudflare DNS 记录</div>
-  </div>
-  <section class="section" style="background:var(--canvas)">
+  <div class="breadcrumb-bar"><div class="inner"><a href="#" onclick="navTo('overview')">总览</a> <span class="sep">›</span> Cloudflare DNS 记录</div></div>
+  <section class="section">
     <div class="container">
-      <div style="margin-bottom:var(--sp-xl)">
-        <p class="caption-md" style="color:var(--mute);margin-bottom:var(--sp-xs)">DNS 记录</p>
-        <h2 class="heading-xl">Cloudflare 域名 DNS 记录</h2>
-        <p class="body-sm" style="color:var(--mute)">选择一个域名查看其 DNS 解析记录。需要设置 CF_API_TOKEN 环境变量。</p>
+      <div class="section-head">
+        <div>
+          <div class="eyebrow" style="font-size:var(--fs-caption-md);font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp-xs)">DNS 记录</div>
+          <h2 class="heading-xl">Cloudflare 域名 DNS</h2>
+        </div>
       </div>
-      <div class="flex-between mb-xl">
-        <select class="text-input" id="dns-zone-select" onchange="loadDnsRecords()" style="width:auto;min-width:320px">
+      <p class="body-sm text-mute mb-xl">选择一个域名查看其 DNS 解析记录。需要设置 <span class="mono">CF_API_TOKEN</span> 环境变量。</p>
+      <div class="toolbar mb-xl">
+        <select class="select-input" id="dns-zone-select" onchange="loadDnsRecords()" style="min-width:320px" aria-label="选择 Cloudflare 域名">
           <option value="">-- 选择 Cloudflare 域名 --</option>
         </select>
-        <button class="btn btn-outline btn-sm" onclick="loadDnsRecords()">刷新记录</button>
+        <button class="btn btn-outline btn-sm" type="button" onclick="loadDnsRecords()">刷新记录</button>
       </div>
       <div id="dns-table-container">
         <p class="body-sm text-mute" id="dns-empty">选择一个 Cloudflare 域名以加载 DNS 记录。</p>
@@ -163,79 +261,118 @@
   </section>
 </div>
 
+</main>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer-section">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand"><span class="corner-square" aria-hidden="true"></span> Domain-Manage</div>
+        <p class="footer-brand-sub">个人产品与域名指挥中心。状态、到期与 DNS，一眼掌控。</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>管理</h4>
+          <a onclick="navTo('services')">服务</a>
+          <a onclick="navTo('domains')">域名</a>
+          <a onclick="navTo('dns')">DNS 记录</a>
+        </div>
+        <div class="footer-col">
+          <h4>操作</h4>
+          <a onclick="openServiceForm()">添加服务</a>
+          <a onclick="openDomainForm()">添加域名</a>
+          <a onclick="syncFromCloudflare()">同步 Cloudflare</a>
+        </div>
+        <div class="footer-col">
+          <h4>系统</h4>
+          <a onclick="openSettings()">设置</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="status-dot"><span id="footer-cf-dot" class="dot red" aria-hidden="true"></span><span id="footer-cf-text">CF 未连接</span></span>
+      <span id="footer-sync">未同步</span>
+      <span class="utility-xs">DOMAIN-MANAGE · 本地部署</span>
+    </div>
+  </div>
+</footer>
+
 <!-- ============================================================
      MODAL: Service Detail
      ============================================================ -->
-<div id="modal-service" class="modal-overlay hidden">
+<div id="modal-service" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-service-title">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-service')">✕</button>
-    <div id="modal-service-content">
-      <!-- Populated by app.js -->
-    </div>
+    <button class="modal-close" type="button" aria-label="关闭" onclick="closeModal('modal-service')">✕</button>
+    <div id="modal-service-content"></div>
   </div>
 </div>
 
 <!-- ============================================================
-     MODAL: Service Form (Add / Edit)
+     MODAL: Service Form
      ============================================================ -->
-<div id="modal-service-form" class="modal-overlay hidden">
+<div id="modal-service-form" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="service-form-title">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-service-form')">✕</button>
+    <button class="modal-close" type="button" aria-label="关闭" onclick="closeModal('modal-service-form')">✕</button>
     <h3 class="modal-title" id="service-form-title">添加服务</h3>
     <form id="service-form" onsubmit="saveServiceForm(event)" style="display:flex;flex-direction:column;gap:var(--sp-lg)">
       <input type="hidden" id="svc-form-id">
-      <div class="form-group">
-        <label>服务名称</label>
-        <input type="text" class="text-input" id="svc-name" required>
-      </div>
-      <div class="form-group">
-        <label>URL</label>
-        <input type="url" class="text-input" id="svc-url" required placeholder="https://...">
-      </div>
-      <div class="form-group">
-        <label>描述</label>
-        <textarea class="text-input" id="svc-desc" rows="2"></textarea>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)">
+      <div class="form-section">
         <div class="form-group">
-          <label>分类</label>
-          <select class="text-input" id="svc-category">
-            <option value="other">其他</option>
-            <option value="blog">博客</option>
-            <option value="website">网站</option>
-            <option value="tool">工具</option>
-            <option value="product">产品</option>
-            <option value="monitoring">监控</option>
-            <option value="infra">基础设施</option>
-          </select>
+          <label for="svc-name">服务名称</label>
+          <input type="text" class="text-input" id="svc-name" required>
         </div>
         <div class="form-group">
-          <label>状态</label>
-          <select class="text-input" id="svc-status">
-            <option value="running">🟢 运行中</option>
-            <option value="maintenance">🟡 维护中</option>
-            <option value="stopped">🔴 已停用</option>
-          </select>
+          <label for="svc-url">URL</label>
+          <input type="url" class="text-input" id="svc-url" required placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="svc-desc">描述</label>
+          <textarea class="text-input" id="svc-desc" rows="2" placeholder="这个服务是做什么的？"></textarea>
         </div>
       </div>
-      <div class="form-group">
-        <label>托管信息（provider / IP / port / stack）</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 80px 1fr;gap:var(--sp-sm)">
-          <input type="text" class="text-input" id="svc-hosting-provider" placeholder="Vultr">
-          <input type="text" class="text-input" id="svc-hosting-ip" placeholder="IP 地址">
-          <input type="number" class="text-input" id="svc-hosting-port" placeholder="端口">
-          <input type="text" class="text-input" id="svc-hosting-stack" placeholder="Docker / Hugo">
+      <div class="form-section">
+        <span class="fs-title">分类与状态</span>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="svc-category">分类</label>
+            <select class="text-input" id="svc-category">
+              <option value="other">其他</option>
+              <option value="blog">博客</option>
+              <option value="website">网站</option>
+              <option value="tool">工具</option>
+              <option value="product">产品</option>
+              <option value="monitoring">监控</option>
+              <option value="infra">基础设施</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="svc-status">状态</label>
+            <select class="text-input" id="svc-status">
+              <option value="running">运行中</option>
+              <option value="maintenance">维护中</option>
+              <option value="stopped">已停用</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>标签（逗号分隔）</label>
-        <input type="text" class="text-input" id="svc-tags" placeholder="博客, 内容创作">
+      <div class="form-section">
+        <span class="fs-title">托管信息</span>
+        <div class="form-row" style="grid-template-columns:1fr 1fr 80px 1fr">
+          <div class="form-group"><label for="svc-hosting-provider">提供商</label><input type="text" class="text-input" id="svc-hosting-provider" placeholder="Vultr"></div>
+          <div class="form-group"><label for="svc-hosting-ip">IP</label><input type="text" class="text-input" id="svc-hosting-ip" placeholder="IP 地址"></div>
+          <div class="form-group"><label for="svc-hosting-port">端口</label><input type="text" class="text-input" id="svc-hosting-port" placeholder="443"></div>
+          <div class="form-group"><label for="svc-hosting-stack">技术栈</label><input type="text" class="text-input" id="svc-hosting-stack" placeholder="Docker / Hugo"></div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>备注（Markdown）</label>
-        <textarea class="text-input" id="svc-notes" rows="3" placeholder="部署笔记、配置要点…"></textarea>
+      <div class="form-section">
+        <span class="fs-title">标签与备注</span>
+        <div class="form-group"><label for="svc-tags">标签（逗号分隔）</label><input type="text" class="text-input" id="svc-tags" placeholder="博客, 内容创作"></div>
+        <div class="form-group"><label for="svc-notes">备注（Markdown）</label><textarea class="text-input" id="svc-notes" rows="3" placeholder="部署笔记、配置要点…"></textarea></div>
       </div>
-      <button type="submit" class="btn btn-primary">保存</button>
+      <button type="submit" class="btn btn-primary btn-block">保存</button>
     </form>
   </div>
 </div>
@@ -243,64 +380,46 @@
 <!-- ============================================================
      MODAL: Domain Detail
      ============================================================ -->
-<div id="modal-domain" class="modal-overlay hidden">
+<div id="modal-domain" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-domain-title">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-domain')">✕</button>
-    <div id="modal-domain-content">
-      <!-- Populated by app.js -->
-    </div>
+    <button class="modal-close" type="button" aria-label="关闭" onclick="closeModal('modal-domain')">✕</button>
+    <div id="modal-domain-content"></div>
   </div>
 </div>
 
 <!-- ============================================================
-     MODAL: Domain Form (Add / Edit)
+     MODAL: Domain Form
      ============================================================ -->
-<div id="modal-domain-form" class="modal-overlay hidden">
+<div id="modal-domain-form" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="domain-form-title">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-domain-form')">✕</button>
+    <button class="modal-close" type="button" aria-label="关闭" onclick="closeModal('modal-domain-form')">✕</button>
     <h3 class="modal-title" id="domain-form-title">添加域名</h3>
     <form id="domain-form" onsubmit="saveDomainForm(event)" style="display:flex;flex-direction:column;gap:var(--sp-lg)">
       <input type="hidden" id="dom-form-id">
-      <div class="form-group">
-        <label>域名</label>
-        <input type="text" class="text-input" id="dom-domain" required placeholder="example.com">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)">
-        <div class="form-group">
-          <label>注册商</label>
-          <input type="text" class="text-input" id="dom-registrar" placeholder="Cloudflare / Namecheap">
+      <div class="form-section">
+        <div class="form-group"><label for="dom-domain">域名</label><input type="text" class="text-input" id="dom-domain" required placeholder="example.com"></div>
+        <div class="form-row">
+          <div class="form-group"><label for="dom-dns-provider">DNS 提供商</label>
+            <select class="text-input" id="dom-dns-provider">
+              <option value="manual">手动管理</option>
+              <option value="cloudflare">Cloudflare</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label>DNS 提供商</label>
-          <select class="text-input" id="dom-dns-provider">
-            <option value="manual">手动管理</option>
-            <option value="cloudflare">Cloudflare</option>
-          </select>
-        </div>
+        <div class="form-group"><label for="dom-cf-zone-id">Cloudflare Zone ID</label><input type="text" class="text-input" id="dom-cf-zone-id" placeholder="从 CF API 获取"></div>
       </div>
-      <div class="form-group">
-        <label>Cloudflare Zone ID</label>
-        <input type="text" class="text-input" id="dom-cf-zone-id" placeholder="从 CF API 获取">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg)">
-        <div class="form-group">
-          <label>域名到期日</label>
-          <input type="date" class="text-input" id="dom-expiry">
-        </div>
-        <div class="form-group">
-          <label>SSL 到期日</label>
-          <input type="date" class="text-input" id="dom-ssl-expiry">
+      <div class="form-section">
+        <span class="fs-title">生命周期</span>
+        <div class="form-row">
+          <div class="form-group"><label for="dom-expiry">域名到期日</label><input type="date" class="text-input" id="dom-expiry"></div>
         </div>
       </div>
-      <div class="form-group">
-        <label>关联服务 ID（逗号分隔）</label>
-        <input type="text" class="text-input" id="dom-service-ids" placeholder="svc-001, svc-002">
+      <div class="form-section">
+        <span class="fs-title">关联</span>
+        <div class="form-group"><label for="dom-service-ids">关联服务 ID（逗号分隔）</label><input type="text" class="text-input" id="dom-service-ids" placeholder="svc-001, svc-002"></div>
+        <div class="form-group"><label for="dom-notes">备注</label><textarea class="text-input" id="dom-notes" rows="2"></textarea></div>
       </div>
-      <div class="form-group">
-        <label>备注</label>
-        <textarea class="text-input" id="dom-notes" rows="2"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary">保存</button>
+      <button type="submit" class="btn btn-primary btn-block">保存</button>
     </form>
   </div>
 </div>
@@ -308,32 +427,28 @@
 <!-- ============================================================
      MODAL: Settings
      ============================================================ -->
-<div id="modal-settings" class="modal-overlay hidden">
+<div id="modal-settings" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal('modal-settings')">✕</button>
-    <h3 class="modal-title">设置</h3>
-    <div style="display:flex;flex-direction:column;gap:var(--sp-xl)">
-      <div class="form-group">
-        <label>Cloudflare API Token</label>
-        <input type="password" class="text-input" id="settings-cf-token" placeholder="输入 CF API Token…">
-        <p class="body-sm" style="color:var(--mute);margin-top:var(--sp-xs)">
-          需要 Zone:Read + DNS:Read 权限。Token 仅存在服务器端环境变量，不会暴露到前端。
-        </p>
-      </div>
-      <p id="settings-cf-note" class="body-sm" style="color:var(--mute)">
-        ⚠️ 开发阶段通过 <code>CF_API_TOKEN=xxx node server.js</code> 设置。点击"验证"测试连接。
-      </p>
-      <div style="display:flex;gap:var(--sp-md)">
-        <button class="btn btn-primary" onclick="testCFConnection()">验证连接</button>
-        <button class="btn btn-outline" onclick="closeModal('modal-settings')">关闭</button>
-      </div>
+    <button class="modal-close" type="button" aria-label="关闭" onclick="closeModal('modal-settings')">✕</button>
+    <h3 class="modal-title" id="settings-title">设置</h3>
+    <div class="form-group" style="margin-bottom:var(--sp-xl)">
+      <label for="settings-cf-token">Cloudflare API Token</label>
+      <input type="password" class="text-input" id="settings-cf-token" placeholder="输入 CF API Token…" autocomplete="off">
+      <p class="hint">需要 Zone:Read + DNS:Read 权限。Token 仅存于服务器端环境变量，不会暴露到前端。</p>
+    </div>
+    <p id="settings-cf-note" class="body-sm text-mute" style="margin-bottom:var(--sp-xl)">开发阶段通过 <span class="mono">CF_API_TOKEN=xxx node server.js</span> 设置。点击"验证"测试连接。</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" type="button" onclick="testCFConnection()">验证连接</button>
+      <button class="btn btn-outline" type="button" onclick="closeModal('modal-settings')">关闭</button>
     </div>
   </div>
 </div>
 
 <!-- ============================================================
-     SCRIPTS
+     TOASTS
      ============================================================ -->
+<div class="toast-container" id="toast-container" aria-live="polite" aria-label="通知"></div>
+
 <script src="/public/app.js"></script>
 </body>
 </html>
