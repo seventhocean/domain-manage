@@ -1,35 +1,18 @@
-# ---- Build Stage ----
-FROM node:22-alpine AS builder
+FROM node:22-alpine
+
 WORKDIR /app
+
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-# ---- Run Stage ----
-FROM node:22-alpine
-
-# Install nginx
-RUN apk add --no-cache nginx
-
-WORKDIR /app
-
-# Copy backend
-COPY --from=builder /app/node_modules ./node_modules
-COPY package.json server.js store.js ./
-
-# Copy frontend
+COPY server.js store.js ./
 COPY public/ ./public/
 
-# Copy nginx config
-COPY nginx.conf /etc/nginx/http.d/default.conf
-
-# Create data dir
 RUN mkdir -p /app/data/screenshots && \
-    mkdir -p /run/nginx && \
     chown -R node:node /app
 
 USER node
 
-EXPOSE 80
+EXPOSE 3000
 
-# Start nginx + node in one container
-CMD nginx && node server.js
+CMD ["node", "server.js"]

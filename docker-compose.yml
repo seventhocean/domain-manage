@@ -3,10 +3,13 @@ services:
     build: .
     container_name: domain-manage
     ports:
-      - "3080:80"
+      - "3080:3000"
     environment:
       - PORT=3000
       - CF_API_TOKEN=${CF_API_TOKEN:-}
     volumes:
-      - ./data:/app/data  # Persist data + screenshots
+      - domain-data:/app/data  # Persist data + screenshots
     restart: unless-stopped
+
+volumes:
+  domain-data:

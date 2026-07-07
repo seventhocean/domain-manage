@@ -763,15 +763,64 @@ async function uploadScreenshot(serviceId, input) {
 // --- Settings ---
 function openSettings() { openModal('modal-settings'); }
 
+async function saveCFToken() {
+  const tokenInput = document.getElementById('settings-cf-token');
+  const note = document.getElementById('settings-cf-note');
+  const token = tokenInput.value.trim();
+
+  if (!token) {
+    note.innerHTML = '⚠️ 请输入 Cloudflare API Token';
+    return;
+  }
+
+  note.innerHTML = '保存中…';
+  try {
+    const resp = await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cf_api_token: token })
+    });
+    const data = await resp.json();
+
+    if (data.cf_api_token_set) {
+      note.innerHTML = '✅ Token 已保存！点击"验证连接"测试。';
+      tokenInput.value = ''; // Clear the input for security
+    } else {
+      note.innerHTML = '❌ 保存失败，请重试';
+    }
+  } catch (err) {
+    note.innerHTML = `❌ 保存失败: ${esc(err.message)}`;
+  }
+}
+
 async function testCFConnection() {
   const note = document.getElementById('settings-cf-note');
+
+  // First save the token if it's been entered
+  const tokenInput = document.getElementById('settings-cf-token');
+  const token = tokenInput.value.trim();
+  if (token) {
+    note.innerHTML = '保存 Token 中…';
+    try {
+      await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cf_api_token: token })
+      });
+      tokenInput.value = ''; // Clear for security
+    } catch (err) {
+      note.innerHTML = `❌ 保存失败: ${esc(err.message)}`;
+      return;
+    }
+  }
+
   note.innerHTML = '验证中…';
   try {
     const data = await (await fetch('/api/cf/zones')).json();
     if (data.success) {
       note.innerHTML = `✅ 连接成功！发现 <strong>${data.result.length}</strong> 个域名。<button class="btn btn-primary btn-sm" style="margin-left:8px" type="button" onclick="syncFromCloudflare()">一键导入</button>`;
     } else if (data.error) {
-      note.innerHTML = `❌ 错误: ${esc(data.error)}。请确保已设置 CF_API_TOKEN 环境变量。`;
+      note.innerHTML = `❌ 错误: ${esc(data.error)}。请在设置中配置 CF API Token。`;
     } else {
       note.innerHTML = `⚠️ API 返回异常: ${esc(JSON.stringify(data))}`;
     }

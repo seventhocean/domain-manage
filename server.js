@@ -113,26 +113,44 @@ app.delete('/api/domains/:id', (req, res) => {
 
 // --- API: Settings ---
 app.get('/api/settings', (req, res) => {
-  res.json(getSettings());
+  const settings = getSettings();
+  // Don't expose the actual token in API responses
+  const { cf_api_token, ...safeSettings } = settings;
+  res.json({
+    ...safeSettings,
+    cf_api_token_set: !!cf_api_token,
+  });
 });
 
 app.put('/api/settings', (req, res) => {
   const s = updateSettings(req.body);
-  res.json(s);
+  // Update the cf_api_token_set flag based on whether token exists
+  if (req.body.cf_api_token !== undefined) {
+    s.cf_api_token_set = !!req.body.cf_api_token;
+    updateSettings({ cf_api_token_set: s.cf_api_token_set });
+  }
+  // Don't expose the actual token in API responses
+  const { cf_api_token, ...safeSettings } = s;
+  res.json({
+    ...safeSettings,
+    cf_api_token_set: !!cf_api_token,
+  });
 });
 
 // --- API: Cloudflare Proxy ---
 const CF_BASE = 'https://api.cloudflare.com/client/v4';
 
 function cfHeaders() {
+  const token = process.env.CF_API_TOKEN || getSettings().cf_api_token || '';
   return {
-    Authorization: `Bearer ${process.env.CF_API_TOKEN || ''}`,
+    Authorization: `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
 }
 
 app.get('/api/cf/zones', async (req, res) => {
-  if (!process.env.CF_API_TOKEN) {
+  const token = process.env.CF_API_TOKEN || getSettings().cf_api_token;
+  if (!token) {
     return res.status(401).json({ error: 'CF_API_TOKEN not set. Run: CF_API_TOKEN=xxx node server.js' });
   }
   try {
@@ -148,7 +166,8 @@ app.get('/api/cf/zones', async (req, res) => {
 });
 
 app.get('/api/cf/zones/:zoneId/dns', async (req, res) => {
-  if (!process.env.CF_API_TOKEN) {
+  const token = process.env.CF_API_TOKEN || getSettings().cf_api_token;
+  if (!token) {
     return res.status(401).json({ error: 'CF_API_TOKEN not set' });
   }
   try {

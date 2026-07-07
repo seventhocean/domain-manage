@@ -434,11 +434,12 @@
     <div class="form-group" style="margin-bottom:var(--sp-xl)">
       <label for="settings-cf-token">Cloudflare API Token</label>
       <input type="password" class="text-input" id="settings-cf-token" placeholder="输入 CF API Token…" autocomplete="off">
-      <p class="hint">需要 Zone:Read + DNS:Read 权限。Token 仅存于服务器端环境变量，不会暴露到前端。</p>
+      <p class="hint">需要 Zone:Read + DNS:Read 权限。Token 安全存储于服务器，不会暴露到前端。</p>
     </div>
-    <p id="settings-cf-note" class="body-sm text-mute" style="margin-bottom:var(--sp-xl)">开发阶段通过 <span class="mono">CF_API_TOKEN=xxx node server.js</span> 设置。点击"验证"测试连接。</p>
+    <p id="settings-cf-note" class="body-sm text-mute" style="margin-bottom:var(--sp-xl)">输入 Token 后点击"保存"，然后点击"验证"测试连接。</p>
     <div class="modal-actions">
-      <button class="btn btn-primary" type="button" onclick="testCFConnection()">验证连接</button>
+      <button class="btn btn-primary" type="button" onclick="saveCFToken()">保存</button>
+      <button class="btn btn-outline" type="button" onclick="testCFConnection()">验证连接</button>
       <button class="btn btn-outline" type="button" onclick="closeModal('modal-settings')">关闭</button>
     </div>
   </div>
@@ -449,6 +450,6 @@
      ============================================================ -->
 <div class="toast-container" id="toast-container" aria-live="polite" aria-label="通知"></div>
 
-<script src="/public/app.js"></script>
+<script src="/public/app.js?v=2"></script>
 </body>
 </html>
