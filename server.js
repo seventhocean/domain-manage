@@ -6,8 +6,8 @@ import { dirname } from 'path';
 import {
   getServices, getService, createService, updateService, deleteService,
   getDomains, getDomain, createDomain, updateDomain, deleteDomain,
-  getSettings, updateSettings,
-  SCREENSHOTS_DIR,
+  getSettings, updateSettings, getDashboardStats,
+  SCREENSHOTS_DIR, COVERS_DIR,
 } from './store.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,6 +18,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use('/public', express.static(join(__dirname, 'public')));
 app.use('/screenshots', express.static(SCREENSHOTS_DIR));
+app.use('/covers', express.static(COVERS_DIR));
 
 // Screenshot upload
 const upload = multer({
@@ -30,6 +31,19 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 10 * 1024 * 1024 },
+});
+
+// Cover image upload
+const coverUpload = multer({
+  storage: multer.diskStorage({
+    destination: COVERS_DIR,
+    filename: (req, file, cb) => {
+      const svcId = req.params.serviceId || 'unknown';
+      const ext = extname(file.originalname) || '.webp';
+      cb(null, `${svcId}-cover${ext}`);
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
 
 // --- API: Health ---
@@ -81,6 +95,21 @@ app.post('/api/services/:serviceId/screenshots', upload.single('screenshot'), (r
   const screenshots = [...(service.screenshots || []), filename];
   updateService(req.params.serviceId, { screenshots });
   res.json({ filename, url: `/screenshots/${filename}` });
+});
+
+// --- API: Cover Image ---
+app.post('/api/services/:serviceId/cover', coverUpload.single('cover'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const filename = req.file.filename;
+  const service = getService(req.params.serviceId);
+  if (!service) return res.status(404).json({ error: 'Service not found' });
+  updateService(req.params.serviceId, { cover_image: `/covers/${filename}` });
+  res.json({ filename, url: `/covers/${filename}` });
+});
+
+// --- API: Dashboard Stats ---
+app.get('/api/dashboard/stats', (req, res) => {
+  res.json(getDashboardStats());
 });
 
 // --- API: Domains CRUD ---
