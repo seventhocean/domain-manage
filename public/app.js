@@ -496,39 +496,18 @@ function goToService(serviceId) {
 
 // --- Cloudflare ---
 async function syncFromCloudflare() {
-  const btn = document.querySelector('.primary-nav .btn-outline-on-dark');
+  const btn = document.querySelector('.nav-actions .btn-outline-on-dark');
   const orig = btn ? btn.textContent : '同步 CF';
   if (btn) { btn.disabled = true; btn.textContent = '同步中…'; }
 
   try {
-    const zonesData = await api('/api/cf/zones?per_page=50');
-    if (!zonesData.success) {
-      showToast('error', '同步失败', JSON.stringify(zonesData.errors));
-      if (btn) { btn.textContent = orig; btn.disabled = false; }
-      return;
-    }
-
-    let added = 0;
-    for (const zone of zonesData.result) {
-      const existing = state.domains.find(d => d.domain === zone.name);
-      if (!existing) {
-        await api('/api/domains', {
-          method: 'POST',
-          body: JSON.stringify({
-            domain: zone.name,
-            dns_provider: 'cloudflare',
-            dns_status: 'active',
-            registrar: 'Cloudflare',
-          }),
-        });
-        added++;
-      }
-    }
-
-    showToast('success', '同步完成', `新增 ${added} 个域名`);
+    const result = await api('/api/cf/sync', { method: 'POST' });
+    showToast('success', '同步完成',
+      `发现 ${result.total_zones} 个域名，新增 ${result.added} 个，更新 ${result.updated} 个 IP 记录`);
     await loadDomains();
     await loadDashboardStats();
-    renderDomains();
+    if (state.view === 'domains') renderDomains();
+    renderDashboard();
   } catch (err) {
     showToast('error', '同步失败', err.message);
   }
@@ -615,27 +594,48 @@ function updateCFStatus(connected) {
 
 // --- Helpers ---
 function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
+  const el = document.getElementById(id);
+  el.classList.remove('hidden');
+  // Trigger reflow for CSS transition to work
+  void el.offsetWidth;
+  el.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-  document.body.style.overflow = '';
+  const el = document.getElementById(id);
+  el.classList.remove('open');
+  el.addEventListener('transitionend', function handler() {
+    el.removeEventListener('transitionend', handler);
+    el.classList.add('hidden');
+    document.body.style.overflow = '';
+  }, { once: true });
+  // Fallback: hide after timeout if transitionend doesn't fire
+  setTimeout(() => {
+    if (el.classList.contains('open')) return;
+    el.classList.add('hidden');
+    document.body.style.overflow = '';
+  }, 400);
 }
 
 function showToast(type, title, message = '') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
+  toast.className = `toast ${type}`;
   toast.innerHTML = `
-    <div class="toast-content">
+    <div class="toast-body">
       <div class="toast-title">${esc(title)}</div>
-      ${message ? `<div class="toast-message">${esc(message)}</div>` : ''}
+      ${message ? `<div class="toast-msg">${esc(message)}</div>` : ''}
     </div>
   `;
   container.appendChild(toast);
-  setTimeout(() => toast.remove(), 5000);
+  // Trigger reflow for CSS transition
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
 }
 
 function esc(str) {

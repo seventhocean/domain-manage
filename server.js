@@ -211,6 +211,86 @@ app.get('/api/cf/zones/:zoneId/dns', async (req, res) => {
   }
 });
 
+// --- API: Cloudflare Full Sync ---
+app.post('/api/cf/sync', async (req, res) => {
+  const token = process.env.CF_API_TOKEN || getSettings().cf_api_token;
+  if (!token) {
+    return res.status(401).json({ error: 'CF_API_TOKEN not set' });
+  }
+  try {
+    // Step 1: Fetch all zones
+    const zonesResp = await fetch(`${CF_BASE}/zones?per_page=50`, { headers: cfHeaders() });
+    const zonesData = await zonesResp.json();
+    if (!zonesData.success) {
+      return res.status(502).json({ error: 'Failed to fetch zones', detail: zonesData.errors });
+    }
+
+    let added = 0;
+    let updated = 0;
+    const existingDomains = getDomains();
+
+    for (const zone of zonesData.result) {
+      const existing = existingDomains.find(d => d.domain === zone.name);
+      let domain;
+
+      if (!existing) {
+        domain = createDomain({
+          domain: zone.name,
+          dns_provider: 'cloudflare',
+          dns_status: zone.status === 'active' ? 'active' : 'inactive',
+          registrar: 'Cloudflare',
+          cf_zone_id: zone.id,
+        });
+        added++;
+      } else {
+        domain = existing;
+        // Ensure cf_zone_id is stored for future syncs
+        updateDomain(domain.id, {
+          dns_provider: 'cloudflare',
+          registrar: domain.registrar || 'Cloudflare',
+          cf_zone_id: zone.id,
+        });
+      }
+
+      // Step 2: Fetch DNS records for this zone
+      try {
+        const dnsResp = await fetch(
+          `${CF_BASE}/zones/${zone.id}/dns_records?per_page=100`,
+          { headers: cfHeaders() }
+        );
+        const dnsData = await dnsResp.json();
+        if (dnsData.success && dnsData.result.length > 0) {
+          const aRecords = dnsData.result.filter(
+            r => (r.type === 'A' || r.type === 'AAAA')
+              && !r.content.startsWith('100::')       // IPv6 discard prefix
+              && r.content !== '::1'                   // localhost IPv6
+          );
+          const ips = [...new Set(aRecords.map(r => r.content))]; // deduplicate
+          if (ips.length > 0) {
+            updateDomain(domain.id, {
+              ip_address: ips.join(', '),
+              dns_status: 'active',
+            });
+            if (existing) updated++; // count as updated only for existing domains
+          }
+        }
+      } catch (e) {
+        // DNS record fetch failed for this zone — not fatal
+        console.warn(`Failed to fetch DNS records for ${zone.name}:`, e.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      added,
+      updated,
+      total_zones: zonesData.result.length,
+    });
+  } catch (e) {
+    res.status(502).json({ error: 'Sync failed', detail: e.message });
+  }
+});
+
 // --- Serve SPA ---
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'index.html'));

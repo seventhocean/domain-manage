@@ -9,6 +9,7 @@ services:
       - CF_API_TOKEN=${CF_API_TOKEN:-}
     volumes:
       - domain-data:/app/data  # Persist data + screenshots
+      - ./public:/app/public   # Live-update frontend without rebuild
     restart: unless-stopped
 
 volumes:
