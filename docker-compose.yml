@@ -3,7 +3,7 @@ services:
     build: .
     container_name: domain-manage
     ports:
-      - "3080:3000"
+      - "127.0.0.1:3080:3000"
     environment:
       - PORT=3000
       - CF_API_TOKEN=${CF_API_TOKEN:-}

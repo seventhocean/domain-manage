@@ -19,6 +19,7 @@ docker compose up -d --build
 
 - 生产域名：`https://waitwinter.eu.cc`（Cloudflare 代理 → 主机 3080 端口）。
 - 数据持久化在 named volume `domain-manage_domain-data`（`data/data.json`、`data/icons/`、截图与封面），`docker compose down` 不会删除数据。
+- 容器端口只绑定本机 `127.0.0.1:3080`，由宿主机 nginx 反代对外；未知域名在 443 上会被拒绝握手，不会误落到面板。
 - `./public` 以 bind mount 挂载，改前端文件后刷新页面即可，无需重建镜像。
 - `CF_API_TOKEN` 环境变量可选；也可在面板「设置」中保存（存于 `data.json`）。
 - `nginx.conf` 是外部反向代理的参考配置，Docker 镜像内不含 nginx，容器直接运行 Node。
