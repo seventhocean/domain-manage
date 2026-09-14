@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY server.js store.js ./
+COPY server.js store.js komari.js probe.js ./
 COPY public/ ./public/
 
 RUN mkdir -p /app/data/screenshots && \

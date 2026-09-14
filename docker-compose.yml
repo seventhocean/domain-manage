@@ -7,6 +7,9 @@ services:
     environment:
       - PORT=3000
       - CF_API_TOKEN=${CF_API_TOKEN:-}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-}
+      - KOMARI_URL=${KOMARI_URL:-}
+      - KOMARI_API_KEY=${KOMARI_API_KEY:-}
     volumes:
       - domain-data:/app/data  # Persist data + screenshots
       - ./public:/app/public   # Live-update frontend without rebuild

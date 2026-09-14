@@ -15,7 +15,16 @@ function ensureDataDir() {
 }
 
 function defaultData() {
-  return { services: [], domains: [], settings: { cf_api_token_set: false } };
+  return { services: [], domains: [], servers: [], deployments: [], settings: { cf_api_token_set: false } };
+}
+
+function normalizeData(data) {
+  data.services = data.services || [];
+  data.domains = data.domains || [];
+  data.servers = data.servers || [];
+  data.deployments = data.deployments || [];
+  data.settings = data.settings || { cf_api_token_set: false };
+  return data;
 }
 
 function readData() {
@@ -24,7 +33,7 @@ function readData() {
     writeFileSync(DATA_FILE, JSON.stringify(defaultData(), null, 2));
     return defaultData();
   }
-  return JSON.parse(readFileSync(DATA_FILE, 'utf-8'));
+  return normalizeData(JSON.parse(readFileSync(DATA_FILE, 'utf-8')));
 }
 
 function writeData(data) {
@@ -108,6 +117,9 @@ export function deleteService(id) {
   if (service.domain) {
     autoAssociateDomains(id, '');
   }
+
+  // 清除部署记录
+  data.deployments = (data.deployments || []).filter(dep => dep.service_id !== id);
 
   data.services.splice(idx, 1);
   writeData(data);
@@ -206,11 +218,107 @@ export function deleteDomain(id) {
   return true;
 }
 
+// --- Servers ---
+export function getServers() {
+  return readData().servers;
+}
+
+export function getServer(id) {
+  return readData().servers.find(s => s.id === id) || null;
+}
+
+export function createServer(server) {
+  const data = readData();
+  const s = {
+    id: uid(),
+    name: '',
+    provider: '',
+    ip: '',
+    ssh_port: 22,
+    region: '',
+    notes: '',
+    created_at: now(),
+    updated_at: now(),
+    ...server,
+  };
+  data.servers.push(s);
+  writeData(data);
+  return s;
+}
+
+export function updateServer(id, patch) {
+  const data = readData();
+  const idx = data.servers.findIndex(s => s.id === id);
+  if (idx === -1) return null;
+  data.servers[idx] = { ...data.servers[idx], ...patch, updated_at: now() };
+  writeData(data);
+  return data.servers[idx];
+}
+
+export function deleteServer(id) {
+  const data = readData();
+  const idx = data.servers.findIndex(s => s.id === id);
+  if (idx === -1) return false;
+  data.deployments = (data.deployments || []).filter(dep => dep.server_id !== id);
+  data.servers.splice(idx, 1);
+  writeData(data);
+  return true;
+}
+
+// --- Deployments ---
+export function getDeployments(serviceId) {
+  const list = readData().deployments;
+  return serviceId ? list.filter(dep => dep.service_id === serviceId) : list;
+}
+
+export function getDeployment(id) {
+  return readData().deployments.find(dep => dep.id === id) || null;
+}
+
+export function createDeployment(deployment) {
+  const data = readData();
+  const dep = {
+    id: uid(),
+    service_id: '',
+    server_id: '',
+    port: '',
+    protocol: 'https',
+    path: '',
+    container: '',
+    notes: '',
+    created_at: now(),
+    updated_at: now(),
+    ...deployment,
+  };
+  data.deployments.push(dep);
+  writeData(data);
+  return dep;
+}
+
+export function updateDeployment(id, patch) {
+  const data = readData();
+  const idx = data.deployments.findIndex(dep => dep.id === id);
+  if (idx === -1) return null;
+  data.deployments[idx] = { ...data.deployments[idx], ...patch, updated_at: now() };
+  writeData(data);
+  return data.deployments[idx];
+}
+
+export function deleteDeployment(id) {
+  const data = readData();
+  const idx = data.deployments.findIndex(dep => dep.id === id);
+  if (idx === -1) return false;
+  data.deployments.splice(idx, 1);
+  writeData(data);
+  return true;
+}
+
 // --- Dashboard Stats ---
 export function getDashboardStats() {
   const data = readData();
   const services = data.services || [];
   const domains = data.domains || [];
+  const servers = data.servers || [];
 
   const servicesRunning = services.filter(s => s.status === 'running').length;
   const domainsActive = domains.filter(d => d.dns_status === 'active').length;
@@ -266,6 +374,9 @@ export function getDashboardStats() {
     domains: {
       total: domains.length,
       active: domainsActive,
+    },
+    servers: {
+      total: servers.length,
     },
     expiring_soon: expiringDomains.map(d => ({
       domain: d.domain,

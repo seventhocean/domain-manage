@@ -1,640 +1,680 @@
 ---
 version: alpha
-name: NVIDIA-design-analysis
-description: |
-  An engineering-grade marketing system organized around two surface modes — a deep black canvas for hero and footer chapters and a flat paper-white canvas for body content — connected by a single, almost violently saturated NVIDIA Green accent that carries every CTA, every active tab, and the small decorative corner squares that mark out cards. The system is unapologetically angular: 2px radius across every surface, tight bold sans-serif typography in NVIDIA's proprietary EMEA cut, and a hairline gray rule that separates dense multi-column technical content. There is no decorative gradient, no atmospheric mesh, no soft drop shadow — just black, white, gray, and green stacked into a structured editorial grid that scales from product cards to massive industry landing pages without bending its rules.
+name: domain-manage-console
+description: "A dark-only operations console for personal domains, services, and servers. Near-black canvas (#0A0A0B), a three-step surface ladder for the app shell, hairline borders instead of shadows, and a single indigo-violet accent (#6C5CE7) reserved for selection, focus, and the one primary action per view. Dense 13–14px Inter UI with tabular JetBrains Mono for domains, IPs, and ports. The layout is a fixed application shell — sidebar, topbar, content — never a scrolling marketing page: no hero, no section bands, no decorative imagery. Asset identity is carried by icon tiles, brand-color stripes, and monogram fallbacks so similar-looking domains stay distinguishable."
 
 colors:
-  primary: "#76b900"
-  on-primary: "#000000"
-  primary-dark: "#5a8d00"
-  ink: "#000000"
-  canvas: "#ffffff"
-  surface-dark: "#000000"
-  surface-soft: "#f7f7f7"
-  surface-elevated: "#1a1a1a"
-  hairline: "#cccccc"
-  hairline-strong: "#5e5e5e"
-  body: "#1a1a1a"
-  mute: "#757575"
-  stone: "#898989"
-  ash: "#a7a7a7"
-  on-dark: "#ffffff"
-  on-dark-mute: "rgba(255,255,255,0.7)"
-  link-blue: "#0046a4"
-  blue-700: "#0046a4"
-  error: "#e52020"
-  error-deep: "#650b0b"
-  warning: "#df6500"
-  warning-bright: "#ef9100"
-  success-deep: "#3f8500"
-  accent-yellow-pale: "#feeeb2"
-  accent-purple: "#952fc6"
-  accent-purple-deep: "#4d1368"
-  accent-purple-pale: "#f9d4ff"
-  accent-green-pale: "#bff230"
+  primary: "#6C5CE7"
+  primary-hover: "#5A4BD4"
+  primary-text: "#9B8DFF"
+  primary-soft: "rgba(108,92,231,0.16)"
+  on-primary: "#FFFFFF"
+  ink: "#F5F6F7"
+  ink-muted: "#C6C9D0"
+  ink-subtle: "#8B8F99"
+  ink-faint: "#5C6069"
+  canvas: "#0A0A0B"
+  surface-1: "#101013"
+  surface-2: "#16161A"
+  surface-3: "#1C1C22"
+  hairline: "rgba(255,255,255,0.08)"
+  hairline-strong: "rgba(255,255,255,0.16)"
+  success: "#56D364"
+  success-soft: "rgba(86,211,100,0.12)"
+  warning: "#E3B341"
+  warning-soft: "rgba(227,179,65,0.12)"
+  danger: "#FF8A80"
+  danger-soft: "rgba(255,138,128,0.12)"
+  overlay: "rgba(0,0,0,0.6)"
 
 typography:
-  display-xl:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 48px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  display-lg:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 36px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  heading-xl:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 24px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  heading-lg:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 22px
-    fontWeight: 400
-    lineHeight: 1.75
-    letterSpacing: 0
-  heading-md:
-    fontFamily: NVIDIA-EMEA
+  page-title:
+    fontFamily: Inter
     fontSize: 20px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  heading-sm:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 18px
-    fontWeight: 700
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: -0.2px
+  section-title:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 1.4
+    letterSpacing: -0.1px
+  card-title:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: 600
     lineHeight: 1.4
     letterSpacing: 0
-  card-title:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 17px
-    fontWeight: 700
-    lineHeight: 1.47
-    letterSpacing: 0
-  body-md:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 16px
+  body:
+    fontFamily: Inter
+    fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  body-strong:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 16px
-    fontWeight: 700
     lineHeight: 1.5
     letterSpacing: 0
   body-sm:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 15px
+    fontFamily: Inter
+    fontSize: 13px
     fontWeight: 400
-    lineHeight: 1.67
+    lineHeight: 1.45
     letterSpacing: 0
-  button-lg:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 18px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  button-md:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 16px
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: 0
-  button-sm:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 14.4px
-    fontWeight: 700
-    lineHeight: 1
-    letterSpacing: 0.144px
-  link-md:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 15px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  caption-md:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 14px
-    fontWeight: 700
-    lineHeight: 1.43
-    letterSpacing: 0
-    textTransform: uppercase
-  caption-sm:
-    fontFamily: NVIDIA-EMEA
+  caption:
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: 400
-    lineHeight: 1.25
+    lineHeight: 1.4
+    letterSpacing: 0.2px
+  label:
+    fontFamily: Inter
+    fontSize: 13px
+    fontWeight: 500
+    lineHeight: 1.4
     letterSpacing: 0
-  caption-xs:
-    fontFamily: NVIDIA-EMEA
+  button:
+    fontFamily: Inter
+    fontSize: 13px
+    fontWeight: 500
+    lineHeight: 1.2
+    letterSpacing: 0
+  eyebrow:
+    fontFamily: Inter
     fontSize: 11px
-    fontWeight: 700
-    lineHeight: 1
-    letterSpacing: 0
-  utility-xs:
-    fontFamily: NVIDIA-EMEA
-    fontSize: 10px
-    fontWeight: 700
+    fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: 0.6px
+  mono-data:
+    fontFamily: JetBrains Mono
+    fontSize: 12.5px
+    fontWeight: 400
     lineHeight: 1.5
     letterSpacing: 0
-    textTransform: uppercase
+    fontFeature: '"tnum"'
+  mono-strong:
+    fontFamily: JetBrains Mono
+    fontSize: 13.5px
+    fontWeight: 500
+    lineHeight: 1.4
+    letterSpacing: 0
+    fontFeature: '"tnum"'
 
 rounded:
-  none: 0px
-  xs: 1px
-  sm: 2px
-  full: 9999px
+  xs: 4px
+  sm: 6px
+  md: 8px
+  lg: 10px
+  xl: 12px
+  pill: 9999px
 
 spacing:
-  xxs: 2px
-  xs: 4px
-  sm: 8px
-  md: 12px
-  lg: 16px
-  xl: 24px
-  xxl: 32px
-  section: 64px
+  xxs: 4px
+  xs: 8px
+  sm: 12px
+  md: 16px
+  lg: 24px
+  xl: 32px
+  xxl: 48px
 
 components:
+  sidebar:
+    backgroundColor: "{colors.surface-1}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.body-sm}"
+    width: 232px
+  sidebar-item:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    padding: 0px 10px
+    height: 32px
+  sidebar-item-active:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    height: 32px
+  topbar:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    height: 48px
+  page-header:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.page-title}"
+    padding: 24px 0px 16px
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-    padding: 11px 24px
-    height: 44px
-  button-primary-active:
-    backgroundColor: "{colors.primary-dark}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-  button-outline:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-    padding: 11px 13px
-  button-outline-on-dark:
-    backgroundColor: "transparent"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.sm}"
-  button-ghost-link:
-    textColor: "{colors.primary}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.none}"
-  button-disabled:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.ash}"
-    rounded: "{rounded.sm}"
-  pill-tab:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink}"
-    typography: "{typography.button-sm}"
-    rounded: "{rounded.sm}"
-    padding: 10px 18px
-  pill-tab-active:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.button-sm}"
-    rounded: "{rounded.sm}"
-  text-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.sm}"
-    padding: 12px 16px
-    height: 44px
-  text-input-focused:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sm}"
-  search-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.sm}"
-    padding: 10px 16px
-    height: 40px
-  product-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.card-title}"
-    rounded: "{rounded.sm}"
-    padding: 24px
-  feature-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.sm}"
-    padding: 32px
-  resource-card:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.card-title}"
-    rounded: "{rounded.sm}"
-    padding: 24px
-  hero-card-dark:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.display-xl}"
-    rounded: "{rounded.none}"
-    padding: 80px 48px
-  cta-strip-dark:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.heading-xl}"
-    rounded: "{rounded.none}"
-    padding: 64px 48px
-  callout-stat:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-lg}"
-    rounded: "{rounded.sm}"
-    padding: 32px
-  corner-square:
-    backgroundColor: "{colors.primary}"
-    rounded: "{rounded.none}"
-    size: 12px
-  utility-bar:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.caption-sm}"
-    rounded: "{rounded.none}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    padding: 0px 12px
     height: 32px
-  primary-nav:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.none}"
-    height: 64px
-  breadcrumb-bar:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.body}"
-    typography: "{typography.caption-md}"
-    rounded: "{rounded.none}"
-    height: 48px
-  sub-nav-strip:
-    backgroundColor: "{colors.surface-soft}"
+  button-primary-hover:
+    backgroundColor: "{colors.primary-hover}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    height: 32px
+  button-secondary:
+    backgroundColor: "{colors.surface-2}"
     textColor: "{colors.ink}"
-    typography: "{typography.button-md}"
-    rounded: "{rounded.none}"
-    height: 56px
-  footer-section:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark-mute}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    padding: 0px 12px
+    height: 32px
+  button-ghost:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    padding: 0px 10px
+    height: 32px
+  button-danger:
+    backgroundColor: "transparent"
+    textColor: "{colors.danger}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    padding: 0px 12px
+    height: 32px
+  button-disabled:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink-subtle}"
+    typography: "{typography.button}"
+    rounded: "{rounded.md}"
+    height: 32px
+  text-input:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    padding: 0px 10px
+    height: 32px
+  text-input-focused:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    height: 32px
+  search-input:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
     typography: "{typography.body-sm}"
-    rounded: "{rounded.none}"
-    padding: 64px 48px
-  link-inline:
-    textColor: "{colors.link-blue}"
-    typography: "{typography.link-md}"
-  badge-tag:
-    backgroundColor: "{colors.surface-soft}"
-    textColor: "{colors.body}"
-    typography: "{typography.caption-md}"
+    rounded: "{rounded.md}"
+    padding: 0px 10px
+    height: 32px
+  command-palette:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.xl}"
+    padding: 4px
+  command-palette-row:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
     rounded: "{rounded.sm}"
-    padding: 4px 10px
+    padding: 0px 10px
+    height: 36px
+  command-palette-row-active:
+    backgroundColor: "{colors.primary-soft}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.body}"
+    rounded: "{rounded.sm}"
+    height: 36px
+  data-table-header:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink-subtle}"
+    typography: "{typography.eyebrow}"
+    height: 36px
+  data-table-row:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    height: 44px
+  data-table-row-hover:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+  asset-card:
+    backgroundColor: "{colors.surface-1}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.lg}"
+    padding: 16px
+  asset-icon:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    size: 40px
+  asset-monogram:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.mono-strong}"
+    rounded: "{rounded.md}"
+    size: 40px
+  tag-chip:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.xs}"
+    padding: 0px 8px
+    height: 22px
+  tag-chip-accent:
+    backgroundColor: "{colors.primary-soft}"
+    textColor: "{colors.on-primary}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.xs}"
+    height: 22px
+  status-badge:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.xs}"
+    padding: 0px 8px
+    height: 22px
+  status-dot-success:
+    backgroundColor: "{colors.success}"
+    rounded: "{rounded.pill}"
+    size: 8px
+  status-dot-warning:
+    backgroundColor: "{colors.warning}"
+    rounded: "{rounded.pill}"
+    size: 8px
+  status-dot-danger:
+    backgroundColor: "{colors.danger}"
+    rounded: "{rounded.pill}"
+    size: 8px
+  status-dot-idle:
+    backgroundColor: "{colors.ink-faint}"
+    rounded: "{rounded.pill}"
+    size: 8px
+  segmented-control:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.md}"
+    padding: 2px
+    height: 28px
+  segmented-item-active:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.sm}"
+    height: 24px
+  modal:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.xl}"
+    padding: 24px
+  modal-scrim:
+    backgroundColor: "{colors.overlay}"
+  divider:
+    backgroundColor: "{colors.hairline}"
+    height: 1px
+  divider-strong:
+    backgroundColor: "{colors.hairline-strong}"
+    height: 1px
+  link-inline:
+    textColor: "{colors.primary-text}"
+    typography: "{typography.body}"
+  status-chip-success:
+    backgroundColor: "{colors.success-soft}"
+    rounded: "{rounded.pill}"
+    padding: 0px 8px
+    height: 22px
+  status-chip-warning:
+    backgroundColor: "{colors.warning-soft}"
+    rounded: "{rounded.pill}"
+    padding: 0px 8px
+    height: 22px
+  status-chip-danger:
+    backgroundColor: "{colors.danger-soft}"
+    rounded: "{rounded.pill}"
+    padding: 0px 8px
+    height: 22px
+  drawer:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    width: 360px
+  toast:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.lg}"
+    padding: 12px 16px
+  tooltip:
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.sm}"
+    padding: 4px 8px
+  kbd:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.xs}"
+    padding: 0px 6px
+    height: 20px
+  empty-state:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink-muted}"
+    typography: "{typography.body}"
+    padding: 48px
+  meter:
+    backgroundColor: "{colors.surface-2}"
+    rounded: "{rounded.pill}"
+    height: 4px
+  meter-fill:
+    backgroundColor: "{colors.primary}"
+    rounded: "{rounded.pill}"
+    height: 4px
+  meter-fill-warning:
+    backgroundColor: "{colors.warning}"
+    rounded: "{rounded.pill}"
+    height: 4px
+  meter-fill-danger:
+    backgroundColor: "{colors.danger}"
+    rounded: "{rounded.pill}"
+    height: 4px
+  login-card:
+    backgroundColor: "{colors.surface-1}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.xl}"
+    padding: 28px
+    width: 360px
+  login-input:
+    backgroundColor: "{colors.surface-2}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.md}"
+    height: 36px
+  skeleton:
+    backgroundColor: "{colors.surface-2}"
+    rounded: "{rounded.sm}"
+    height: 12px
 ---
 
 ## Overview
 
-NVIDIA's marketing system is built like a piece of engineering documentation that learned graphic design — every page is a structured cascade of dense, factual information arranged on a paper-white grid, framed top and bottom by deep black hero/footer chapters. There is exactly one accent color in the entire system, and it is doing all the work: NVIDIA Green (`{colors.primary}` — `#76b900`), used for every primary CTA, every active tab, every link affordance on dark surfaces, and the small decorative corner squares that mark out card containers. Nothing else competes for attention.
+This is an **application shell, not a website**. There is no hero, no scroll narrative, no full-bleed section bands, no atmospheric gradient, and no marketing display type. The user is here to look something up and leave — every screen must answer a question in one glance.
 
-The system's character comes from extreme typographic restraint and an almost punishingly angular geometry. Every container, button, and image uses `{rounded.sm}` (2px) — a token that's barely-there but never zero, giving the system the precise, technical feel of CAD output rather than warm consumer software. Cards sit on plain `{colors.canvas}` with a hairline `{colors.hairline}` border (no shadow, no elevation), separated by tight 8px-base spacing rhythm. Long-form pages stack 6–10 of these cards into multi-column technical grids without ever introducing decorative breaks.
+The system is dark-only. The canvas is `{colors.canvas}` (#0A0A0B), a near-black with a faint neutral tint. On top sits a three-step surface ladder — `{colors.surface-1}` for the sidebar and cards, `{colors.surface-2}` for inputs, hovered rows, and chips, `{colors.surface-3}` for floating layers (command palette, modal, toast). Separation comes from 1px `{colors.hairline}` borders and the surface ladder, never from drop shadows or gradients.
 
-The black-canvas hero and footer chapters are the system's "headline moments" — a single full-bleed photographic or 3D-rendered image with `{typography.display-xl}` headline copy laid in white, a single green CTA button, and a small green corner square as the only ornamentation. Everything else is subordinate.
+Exactly **one chromatic accent** exists: indigo-violet `{colors.primary}` (#6C5CE7). It marks selection, focus, links, and at most one primary button per view. Everything else is monochrome gray plus a low-saturation semantic trio (`{colors.success}`, `{colors.warning}`, `{colors.danger}`) used almost exclusively as 8px dots and hairline accents — not as large fills, not as text color on body copy.
+
+The shell: a fixed 232px `{component.sidebar}` on the left, a 48px `{component.topbar}` across the top, and a fluid content area that fills the rest. The page never scrolls as a whole; only the content column scrolls. Desktop density is high: 32px controls, 44px table rows, 13–14px type.
+
+Identity is the product's job: a domain is never just a string. It renders as `{component.asset-icon}` (favicon, or `{component.asset-monogram}` fallback), a brand-color stripe, a bold name with a de-emphasized TLD, and mono `{typography.mono-data}` for IPs and ports.
 
 **Key Characteristics:**
-- Single-accent system: `{colors.primary}` carries every CTA, active state, and decorative motif. The rest is monochrome black/white/gray.
-- Two-mode surface architecture: `{colors.surface-dark}` for hero/footer chapters; `{colors.canvas}` for body — alternating in a predictable rhythm down the page
-- Hyper-angular geometry: `{rounded.sm}` (2px) on every interactive element. There are no pill buttons, no rounded cards, no soft chrome.
-- NVIDIA-EMEA proprietary sans-serif at weights 400 and 700, scaled across a 12-tier hierarchy from `{typography.utility-xs}` (10px) up to `{typography.display-xl}` (48px)
-- Card library leans on hairline `{colors.hairline}` borders and `{colors.surface-soft}` backgrounds rather than shadows for separation
-- Signature decorative element: the small `{component.corner-square}` (~12px green square) anchored to one corner of resource and feature cards
-- Dense multi-column footer with 4–6 link columns on `{colors.surface-dark}` — every page closes with the same structured global navigation
+- Fixed app shell — sidebar + topbar + content; content scrolls, chrome never does.
+- Dark-only; no light mode.
+- Single indigo accent `{colors.primary}`, used scarcely.
+- Three-step surface ladder + `{colors.hairline}` borders instead of shadows.
+- 13–14px dense UI; `{typography.mono-data}` for every machine identifier.
+- Asset icon tiles as the primary recognition anchor.
+- Command palette (`{component.command-palette}`) as the primary global search.
 
 ## Colors
 
-> **Source pages:** `/tr-tr/` (primary homepage), `/en-eu/industries/healthcare-life-sciences/`, `/en-eu/solutions/ai/`, `/en-eu/ai/foundry/`. The chrome palette is identical across all four — only photography and copy vary.
-
 ### Brand & Accent
-- **NVIDIA Green** (`{colors.primary}` — `#76b900`): the brand. Every primary CTA, every active state, every link affordance on dark surfaces, every corner square, and the brand wordmark itself.
-- **NVIDIA Green Dark** (`{colors.primary-dark}` — `#5a8d00`): pressed state for the primary button — a single notch deeper than the brand green.
-- **Accent Green Pale** (`{colors.accent-green-pale}` — `#bff230`): rare highlight tint used in editorial callouts and decorative micro-blocks; never on chrome.
+
+- **Primary** (`{colors.primary}` #6C5CE7): selection, active nav, focus ring, inline links, and the single primary button per view. If two indigo elements compete in one viewport, one of them is wrong.
+- **Primary Hover** (`{colors.primary-hover}` #5A4BD4): pressed/darker state for `{component.button-primary}`. On dark surfaces the hover state moves *down* in luminance, not up — this keeps white label contrast above 4.5:1.
+- **Primary Text** (`{colors.primary-text}` #9B8DFF): the lightened accent for inline links (`{component.link-inline}`) and accent numerals on dark; `{colors.primary}` itself is too dark to read as body-size text on `{colors.canvas}`.
+- **Primary Soft** (`{colors.primary-soft}` 16%): selection wash for `{component.command-palette-row-active}`, focus halos, and `{component.tag-chip-accent}`.
+- **On Primary** (`{colors.on-primary}`): white label on `{component.button-primary}`.
 
 ### Surface
-- **Page Canvas** (`{colors.canvas}` — `#ffffff`): the body of every page. Cards sit directly on it with hairline rules.
-- **Soft Surface** (`{colors.surface-soft}` — `#f7f7f7`): breadcrumb strip, sub-nav, side-by-side comparison panels, alternating row backgrounds.
-- **Black Canvas** (`{colors.surface-dark}` — `#000000`): hero chapter, dark CTA strips, footer, primary nav. The system's "frame" color.
-- **Surface Elevated** (`{colors.surface-elevated}` — `#1a1a1a`): nested dark panels inside the footer (column dividers, fine-print bar).
-- **Hairline** (`{colors.hairline}` — `#cccccc`): 1px card border, table rule, divider between footer link sections.
-- **Hairline Strong** (`{colors.hairline-strong}` — `#5e5e5e`): 1px divider on dark surfaces (footer column rules, dark-mode card edges).
+
+- **Canvas** (`{colors.canvas}` #0A0A0B): the app background and table background.
+- **Surface 1** (`{colors.surface-1}`): sidebar, `{component.asset-card}`, settings panels.
+- **Surface 2** (`{colors.surface-2}`): inputs, `{component.data-table-row-hover}`, chips, `{component.drawer}`, kbd caps.
+- **Surface 3** (`{colors.surface-3}`): floating layers only — `{component.modal}`, `{component.command-palette}`, `{component.toast}`, `{component.tooltip}`.
+- **Hairline** (`{colors.hairline}` 8% white): every border and divider, including `{component.divider}`. **Hairline Strong** (`{colors.hairline-strong}` 16% white) for input borders, danger button outline, and `{component.divider-strong}`.
+- **Overlay** (`{colors.overlay}`): the 60% black scrim rendered by `{component.modal-scrim}` behind `{component.modal}` and `{component.command-palette}`.
 
 ### Text
-- **Ink** (`{colors.ink}` — `#000000`): headlines and body text on `{colors.canvas}`.
-- **Body** (`{colors.body}` — `#1a1a1a`): long-form paragraph text where pure black is too heavy.
-- **Mute** (`{colors.mute}` — `#757575`): metadata, breadcrumb separators, footer copyright.
-- **Stone** (`{colors.stone}` — `#898989`): least-emphasis text and disabled state.
-- **Ash** (`{colors.ash}` — `#a7a7a7`): disabled icon color and faint utility text.
-- **On Dark** (`{colors.on-dark}` — `#ffffff`): primary text on `{colors.surface-dark}`.
-- **On Dark Mute** (`{colors.on-dark-mute}` — `rgba(255,255,255,0.7)`): secondary footer link text and dark-canvas body copy.
+
+- **Ink** (`{colors.ink}` #F5F6F7): primary text, values, active nav labels.
+- **Ink Muted** (`{colors.ink-muted}` #C6C9D0): secondary text, descriptions, inactive nav labels, `{component.status-badge}` labels.
+- **Ink Subtle** (`{colors.ink-subtle}` #8B8F99): metadata, table column headers, captions, TLD in a domain name.
+- **Ink Faint** (`{colors.ink-faint}` #5C6069): disabled labels, `{component.status-dot-idle}`, decorative separators.
 
 ### Semantic
-- **Error** (`{colors.error}` — `#e52020`): validation messages, destructive confirmation.
-- **Error Deep** (`{colors.error-deep}` — `#650b0b`): pressed state for error buttons; hover-pressed validation icons.
-- **Warning** (`{colors.warning}` — `#df6500`): caution callouts, deprecated documentation banners.
-- **Warning Bright** (`{colors.warning-bright}` — `#ef9100`): inverse warning on dark canvas.
-- **Success Deep** (`{colors.success-deep}` — `#3f8500`): positive confirmation where NVIDIA Green's saturation would clash.
-- **Link Blue** (`{colors.link-blue}` — `#0046a4`): inline anchor link color on light canvas — the only blue in the system, reserved for prose-embedded hyperlinks.
 
-### Editorial Accents (used sparingly inside long-form content)
-- **Accent Purple** (`{colors.accent-purple}` — `#952fc6`): research / scientific computing editorial accent.
-- **Accent Purple Deep** (`{colors.accent-purple-deep}` — `#4d1368`): paired dark for purple lockups.
-- **Accent Purple Pale** (`{colors.accent-purple-pale}` — `#f9d4ff`): wash background for editorial callouts.
-- **Accent Yellow Pale** (`{colors.accent-yellow-pale}` — `#feeeb2`): documentation tip / soft callout fill.
+Semantic colors are **dots and rules first, text second, fills never**. Each has a 12% `-soft` companion used only inside small chips.
+
+- **Success** (`{colors.success}`): resolved DNS, saved confirmation, `{component.status-dot-success}`.
+- **Warning** (`{colors.warning}`): maintenance markers, `{component.status-dot-warning}`.
+- **Danger** (`{colors.danger}`): disabled services, destructive actions, `{component.status-dot-danger}`, `{component.button-danger}`.
+- **Success Soft / Warning Soft / Danger Soft** (`{colors.success-soft}`, `{colors.warning-soft}`, `{colors.danger-soft}`): optional chip washes where a dot alone is too quiet.
 
 ## Typography
 
 ### Font Family
-- **NVIDIA-EMEA** is the proprietary brand sans-serif used across every text role on the site. It carries weights 400 (regular) and 700 (bold) and falls back to Arial → Helvetica.
-- **Font Awesome 6 Pro** and **Font Awesome 6 Sharp** are used exclusively for iconography (chevrons, social glyphs, breadcrumb separators, search/menu icons) at sizes 14–22px.
 
-NVIDIA's type system is unusually flat: most chrome and body roles render at the same line-height (1.25–1.5) with the only meaningful variation coming from weight (400 vs 700) and size. The system relies on weight contrast — not size jumps and not color tinting — to establish hierarchy, which gives marketing copy and technical documentation an editorial newspaper feel.
+- **Inter** — the entire UI, weights 400/500/600. No 700; weight 600 is the ceiling so dense text does not shout.
+- **JetBrains Mono** — machine data only: domains, IP addresses, ports, container names, zone IDs, timestamps. `{typography.mono-data}` is tabular (`tnum`) so digits align in columns; `{typography.mono-strong}` is for the domain name in detail headers and monograms.
 
 ### Hierarchy
 
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-xl}` | 48px | 700 | 1.25 | 0 | Hero headline on `{component.hero-card-dark}` |
-| `{typography.display-lg}` | 36px | 700 | 1.25 | 0 | Section headline ("Explore Our AI Solutions"), large stat callouts |
-| `{typography.heading-xl}` | 24px | 700 | 1.25 | 0 | Sub-section title, dark CTA-strip headline |
-| `{typography.heading-lg}` | 22px | 400 | 1.75 | 0 | Long-form intro paragraph that doubles as a heading |
-| `{typography.heading-md}` | 20px | 700 | 1.25 | 0 | Card group title, sub-nav anchor heading |
-| `{typography.heading-sm}` | 18px | 700 | 1.4 | 0 | Side-rail filter group, small section label |
-| `{typography.card-title}` | 17px | 700 | 1.47 | 0 | Resource card title, product card title |
-| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Body copy, default paragraph |
-| `{typography.body-strong}` | 16px | 700 | 1.5 | 0 | Inline emphasis, primary nav link, label |
-| `{typography.body-sm}` | 15px | 400 | 1.67 | 0 | Card description, secondary copy |
-| `{typography.button-lg}` | 18px | 700 | 1.25 | 0 | Hero primary CTA |
-| `{typography.button-md}` | 16px | 700 | 1.25 | 0 | Standard primary/secondary buttons |
-| `{typography.button-sm}` | 14.4px | 700 | 1 | 0.144px | Compact pill tab, in-card secondary CTA |
-| `{typography.link-md}` | 15px | 400 | 1.5 | 0 | Inline anchor link in body prose |
-| `{typography.caption-md}` | 14px | 700 | 1.43 | 0 | Eyebrow over section heading, breadcrumb (uppercase) |
-| `{typography.caption-sm}` | 12px | 400 | 1.25 | 0 | Footnote copy, metadata, table caption |
-| `{typography.caption-xs}` | 11px | 700 | 1 | 0 | Pill chip label, utility-bar text |
-| `{typography.utility-xs}` | 10px | 700 | 1.5 | 0 | Legal fine-print bar at the very bottom (uppercase) |
+| Token | Size | Weight | Line Height | Use |
+|---|---|---|---|---|
+| `{typography.page-title}` | 20px | 600 | 1.3 | Page header title only |
+| `{typography.section-title}` | 16px | 600 | 1.4 | Detail section headings, modal titles |
+| `{typography.card-title}` | 14px | 600 | 1.4 | Asset card title, list primary label |
+| `{typography.body}` | 14px | 400 | 1.5 | Default body, inputs, command palette rows |
+| `{typography.body-sm}` | 13px | 400 | 1.45 | Table cells, sidebar items, secondary copy |
+| `{typography.label}` | 13px | 500 | 1.4 | Form labels, field values, nav emphasis |
+| `{typography.button}` | 13px | 500 | 1.2 | All button labels |
+| `{typography.caption}` | 12px | 400 | 1.4 | Metadata, timestamps, chip labels |
+| `{typography.eyebrow}` | 11px | 600 | 1.2 | Table headers, uppercase, +0.6px tracking |
+| `{typography.mono-data}` | 12.5px | 400 | 1.5 | IPs, ports, IDs, timestamps, tabular |
+| `{typography.mono-strong}` | 13.5px | 500 | 1.4 | Domain in detail header, monogram glyphs |
 
 ### Principles
-The typography is brand-locked: NVIDIA-EMEA is used at every level, no serif, no display variant, no monospace, no italic. Hierarchy is built almost entirely from size and weight — color is reserved for emphasis (`{colors.primary}` on links over dark, `{colors.link-blue}` on light) and never used to separate type tiers.
 
-### Note on Font Substitutes
-NVIDIA-EMEA is proprietary. The closest open-source pairing is **Inter** (weights 400/700) — its x-height and stroke contrast match NVIDIA-EMEA's optical metrics within ~2% at body sizes. **Arial** is the official documented fallback and is acceptable for any system where Inter is unavailable. Avoid Helvetica Now or Helvetica Neue substitutes; their slightly tighter cap heights drift away from the brand's geometry.
+- **No display type.** The largest type in the product is 20px. A management console that needs 48px headlines is a marketing page in disguise.
+- **Weight ceiling is 600.** Hierarchy comes from size, color (`{colors.ink}` → `{colors.ink-muted}` → `{colors.ink-subtle}`), and spacing.
+- **Mono means machine.** If a human named it (service, alias, tag), it is Inter. If a machine assigned it (domain, IP, port, ID), it is JetBrains Mono.
+- **Numbers always tabular.** `{typography.mono-data}` carries `tnum` so IPs, ports, and counts line up vertically.
+- **Uppercase only for `{typography.eyebrow}`**, never for buttons or nav.
 
 ## Layout
 
-### Spacing System
-- **Base unit:** 8px
-- **Tokens (front matter):** `{spacing.xxs}` (2px) · `{spacing.xs}` (4px) · `{spacing.sm}` (8px) · `{spacing.md}` (12px) · `{spacing.lg}` (16px) · `{spacing.xl}` (24px) · `{spacing.xxl}` (32px) · `{spacing.section}` (64px)
-- **Universal section rhythm:** every page in the set uses `{spacing.section}` (64px) as the vertical gap between major content blocks. Card grids use `{spacing.xl}` (24px) gutters; in-card padding sits at `{spacing.xl}` to `{spacing.xxl}` depending on density.
-- **Hero chapter padding:** 80px vertical / 48px horizontal — the largest spacing in the system, reserved for `{component.hero-card-dark}`.
+### App Shell
 
-### Grid & Container
-- **Max width:** ~1280px content area at desktop, with 24px gutters that grow to ~48px at ultrawide.
-- **Column patterns:**
-  - Card grids: 4-up at desktop, 3-up at 1024px, 2-up at 768px, 1-up at 480px.
-  - Long-form text: 2-column 60/40 split (body + sidebar) at desktop, single-column at < 960px.
-  - Footer: 6-up link columns at desktop, collapsing to 2-up on tablet, full accordion on mobile.
-- **Card aspect:** product cards lean to 1:1 or 4:3 with 16:9 imagery on top + 1–2 lines of metadata below. Resource cards are 3:2 imagery with a longer description block.
+```
+┌──────────────────────────────────────────────────────────┐
+│ topbar 48px: brand · search · sync · settings            │
+├────────────┬─────────────────────────────────────────────┤
+│ sidebar    │ content (scrolls)                           │
+│ 232px      │  page-header: title + actions               │
+│ fixed      │  toolbar: filter · search · count · toggle  │
+│ nav +      │  table / cards / detail sections            │
+│ status     │                                             │
+└────────────┴─────────────────────────────────────────────┘
+```
 
-### Whitespace Philosophy
-Whitespace is structural, not atmospheric. Sections butt against each other with `{spacing.section}` rhythm — there are no decorative dividers, no empty "breathing room" bands, no gradient transitions between sections. The sense of air comes from `{colors.canvas}` body sections sandwiched between `{colors.surface-dark}` chapter blocks, not from generous padding inside any one component.
+- `{component.sidebar}` is fixed, full height, `{colors.surface-1}` background, 1px right `{colors.hairline}`. Items are 32px tall (`{component.sidebar-item}`), active item uses `{component.sidebar-item-active}` — a `{colors.surface-2}` fill plus `{colors.ink}` label. No colored left bars, no pill shapes.
+- `{component.topbar}` is 48px, `{colors.canvas}`, 1px bottom hairline, `position: sticky`. It carries the global `{component.search-input}`, the Cloudflare sync action, and settings.
+- The content column is the only scroll container. Page heading uses `{component.page-header}`.
+- Content max width is 1280px with `{spacing.lg}` 24px gutters; tables may run full width.
+
+### Page Patterns
+
+- **List page** (Domains, Services, Servers): `{component.page-header}` with the primary action on the right → toolbar row → table or `{component.asset-card}` grid. The toolbar holds search, tag filter, `{component.segmented-control}` view toggle, and result count.
+- **Detail page**: back link in `{colors.ink-subtle}` at top → identity header (icon + name + mono domain) → stacked `{typography.section-title}` sections separated by `{colors.hairline}` rules → inline edit actions. No tabs unless there are 3+ distinct sections.
+- **Settings**: a single narrow column (max 640px) of labeled fields inside `{colors.surface-1}` panels.
+- **Overlay surfaces** are for create/edit forms and confirmations only; browsing details never happens in a `{component.modal}`.
+
+### Density & Spacing
+
+- Base unit 4px. Tokens: `{spacing.xxs}` 4 · `{spacing.xs}` 8 · `{spacing.sm}` 12 · `{spacing.md}` 16 · `{spacing.lg}` 24 · `{spacing.xl}` 32 · `{spacing.xxl}` 48.
+- Controls are 32px tall (button, input, select). Table rows are 44px; card grid gap `{spacing.sm}`.
+- Section gaps inside detail pages: `{spacing.lg}`. Between major page blocks: `{spacing.xl}`.
+- Card interior padding `{spacing.md}` 16px; modal padding `{spacing.lg}` 24px.
 
 ## Elevation & Depth
 
 | Level | Treatment | Use |
 |---|---|---|
-| 0 — Flat | No border, no shadow | Canvas-on-canvas blocks, hero chapter content, footer column body |
-| 1 — Hairline border | 1px solid `{colors.hairline}` | All cards on `{colors.canvas}`, table cells, comparison panels |
-| 2 — Hairline strong | 1px solid `{colors.hairline-strong}` | Dividers on `{colors.surface-dark}` (footer column rules, dark-card edges) |
-| 3 — Soft shadow | `0 0 5px 0 rgba(0,0,0,0.3)` | Sticky nav bottom edge when scrolled, sticky CTA bar — used very sparingly |
+| 0 | `{colors.canvas}`, no border | Page background, table background |
+| 1 | `{colors.surface-1}` + 1px `{colors.hairline}` | Sidebar, asset cards, settings panels |
+| 2 | `{colors.surface-2}` + 1px `{colors.hairline}` | Inputs, hovered rows, chips, drawer |
+| 3 | `{colors.surface-3}` + 1px `{colors.hairline-strong}`, `0 16px 48px rgba(0,0,0,0.5)` | Command palette, modal, toast, tooltip |
+| Focus | 2px `{colors.primary-soft}` halo + 1px `{colors.primary}` border | `{component.text-input-focused}`, focused buttons, active search |
 
-NVIDIA's system has effectively no drop-shadow elevation in card or content surfaces. The only "shadow" in the extracted tokens is a subtle 5px ambient on sticky chrome bars. Cards do not lift; cards are flat rectangles with hairline borders.
-
-### Decorative Depth
-Depth in NVIDIA's system comes from photography and 3D-rendered hero imagery rather than from CSS effects:
-- **Hero imagery:** full-bleed photographic or rendered scenes (data-center hardware, neural-net visualizations, life-sciences microscopy) sit behind hero copy with a dark gradient overlay for legibility.
-- **Decorative corner squares:** the small `{component.corner-square}` (~12px solid `{colors.primary}` square) anchored to the top-left or bottom-right corner of resource and feature cards — the system's only consistent ornamental device.
-- **Editorial 3D accents:** isometric or wireframe 3D renderings appear as illustration-style fills inside long-form articles, never as chrome.
+Shadows exist **only on level 3 floating layers**. Cards, tables, and the shell use borders. There are no gradients anywhere in the product.
 
 ## Shapes
 
-### Border Radius Scale
-
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.none}` | 0px | Hero chapter, footer, dark CTA strips, primary nav |
-| `{rounded.xs}` | 1px | Decorative micro-rules and inset accent strips |
-| `{rounded.sm}` | 2px | Every interactive element — buttons, cards, inputs, pill tabs, badges |
-| `{rounded.full}` | 9999px / 50% | Avatar circles, social-icon dots, brand wordmark icon |
+| `{rounded.xs}` | 4px | `{component.tag-chip}`, `{component.status-badge}`, `{component.kbd}` |
+| `{rounded.sm}` | 6px | Sidebar items, command palette rows, skeleton bars |
+| `{rounded.md}` | 8px | Buttons, inputs, `{component.asset-icon}`, segmented control |
+| `{rounded.lg}` | 10px | `{component.asset-card}`, `{component.toast}` |
+| `{rounded.xl}` | 12px | `{component.modal}`, `{component.command-palette}` |
+| `{rounded.pill}` | 9999px | `{component.status-dot-success}` and siblings only |
 
-The system is aggressively angular. Outside of avatar/icon circles, no element exceeds 2px radius. The 2px is enough to soften the optical aliasing on a sharp edge but small enough that the system reads as engineering-grade rather than consumer-friendly.
-
-### Photography Geometry
-- **Hero imagery:** full-bleed 16:9 (desktop) cropping to 4:5 portrait on mobile.
-- **Card imagery:** 16:9 thumbnail at the top of resource cards; 1:1 square for product/SKU cards; 3:2 for editorial article cards.
-- **Decorative corner squares:** 12×12px on standard cards, scaled to 16×16 on hero callouts.
-- **Avatar/social icons:** 32–40px circles with 1px hairline.
+No stadium-shaped buttons. No pill nav items. The only circles in the product are status dots and avatars.
 
 ## Components
 
-> **No hover states documented** per system policy. Each spec covers Default and Active/Pressed only; variants live as separate `components:` entries in the front matter.
+### Navigation
+
+- `{component.sidebar}` — fixed left rail; brand mark at top, nav list middle, environment/status footer at bottom (sync state dot). Width 232px.
+- `{component.sidebar-item}` and `{component.sidebar-item-active}` — 32px rows with a 16px inline SVG icon (1.5px stroke, `{colors.ink-subtle}` at rest, `{colors.ink}` active) and a label. Counts render right-aligned in `{typography.mono-data}`.
+- `{component.topbar}` — brand, `{component.search-input}` (which opens the command palette on focus), sync button, settings icon.
 
 ### Buttons
 
-**`button-primary`** — the universal NVIDIA CTA
-- Background `{colors.primary}`, text `{colors.on-primary}`, type `{typography.button-md}`, padding `11px 24px`, height `44px`, rounded `{rounded.sm}`.
-- The single most-repeated component in the system: hero CTA, dark CTA strip, "Learn More" on every card group, "Sign Up" / "Get Started" on every long-form page bottom.
-- Pressed state lives in `button-primary-active` — background drops to `{colors.primary-dark}` (`#5a8d00`) with the same text color.
+- `{component.button-primary}` — the single accent action per view. 32px, `{rounded.md}`, white label. Hover/pressed uses `{component.button-primary-hover}`.
+- `{component.button-secondary}` — `{colors.surface-2}` fill, `{colors.ink}` label, 1px `{colors.hairline}` border. The default for "编辑", "关联", "上传".
+- `{component.button-ghost}` — borderless `{colors.ink-muted}` label for icon-adjacent and tertiary actions; hover raises text to `{colors.ink}`.
+- `{component.button-danger}` — transparent fill, `{colors.danger}` label, 1px `{colors.hairline-strong}` border. Destructive actions are outlined, never solid red, and always require a confirm step.
+- `{component.button-disabled}` — `{colors.surface-2}` fill with `{colors.ink-faint}` label; also `not-allowed` cursor, never reduced opacity on the whole control.
 
-**`button-outline`** — secondary on light canvas
-- Background transparent, text `{colors.ink}`, 2px solid `{colors.primary}` border, type `{typography.button-md}`, padding `11px 13px`, rounded `{rounded.sm}`.
-- The system's most distinctive secondary CTA: a clear pane bordered in NVIDIA Green. Used for "Read the Documentation", "Watch the Video", "Compare Products" — second-tier actions that still earn the brand color.
+### Inputs
 
-**`button-outline-on-dark`** — outline on `{colors.surface-dark}`
-- Background transparent, text `{colors.on-dark}`, 1px solid `{colors.on-dark}`, type `{typography.button-md}`, rounded `{rounded.sm}`.
-- White-on-black variant used in dark hero/footer CTA strips paired with a primary green button.
+- `{component.text-input}` 32px, `{colors.surface-2}`, 1px `{colors.hairline}`, `{typography.body}`. Focus state is `{component.text-input-focused}`: border becomes `{colors.primary}` plus the focus halo.
+- `{component.search-input}` — same geometry, `{typography.body-sm}`, with a `{component.kbd}` hint (`⌘K` / `Ctrl K`) right-aligned.
+- Labels sit above fields in `{typography.label}` + `{colors.ink-muted}`; help text below in `{typography.caption}` + `{colors.ink-subtle}`. Errors replace help text with `{colors.danger}` text plus a `{component.status-dot-danger}`.
 
-**`button-ghost-link`** — inline arrow link
-- Text `{colors.primary}` with a small right-arrow icon, type `{typography.button-md}`, no background, no border, rounded `{rounded.none}`.
-- "Learn More →" affordance sitting at the bottom of resource cards and long-form section blocks. The arrow is uppercase and bold per `{typography.caption-md}`-equivalent treatment.
+### Command palette
 
-**`button-disabled`**
-- Background `{colors.surface-soft}`, text `{colors.ash}`, rounded `{rounded.sm}` — flat gray.
+- `{component.command-palette}` — `{colors.surface-3}` floating card, 12px radius, centered near the top of the viewport over `{colors.overlay}`. Input row on top, results below, footer hints in `{component.kbd}`.
+- `{component.command-palette-row}` rows are 36px with a leading 16px asset icon and trailing type label in `{colors.ink-subtle}`.
+- `{component.command-palette-row-active}` is the only place a `{colors.primary-soft}` wash appears at row scale. Keyboard selection must be visible at all times.
 
-### Tabs & Chips
+### Tables & lists
 
-**`pill-tab`** + **`pill-tab-active`**
-- Default: transparent background, text `{colors.ink}`, type `{typography.button-sm}`, padding `10px 18px`, rounded `{rounded.sm}`.
-- Active: background `{colors.ink}`, text `{colors.on-dark}` — the tab flips inverted on selection. Used in the "Latest in AI Resources" filter strip and similar segmented controls.
+- `{component.data-table-header}` — 36px, `{typography.eyebrow}`, `{colors.ink-subtle}`, 1px bottom `{colors.hairline}`. Never sortable-looking unless sortable; sort arrows are 12px inline SVG.
+- `{component.data-table-row}` — 44px, 1px bottom `{colors.hairline}`, `{typography.body-sm}`; the first cell carries the asset icon + name, machine values use `{typography.mono-data}`.
+- `{component.data-table-row-hover}` — `{colors.surface-2}` fill; row actions (edit/delete) fade in on hover and are always reachable by keyboard focus.
+- Card grids (`{component.asset-card}`) are the default on mobile and for domains; tables are the default on desktop for servers and services.
 
-**`badge-tag`**
-- Background `{colors.surface-soft}`, text `{colors.body}`, type `{typography.caption-md}`, padding `4px 10px`, rounded `{rounded.sm}` (uppercase).
-- Document type / category labels at the top of resource cards ("WHITE PAPER", "WEBINAR", "BLOG").
+### Asset identity
 
-### Inputs & Forms
+- `{component.asset-icon}` — 40px rounded tile holding the favicon (or cover crop). Falls back to `{component.asset-monogram}`: first letter or two of the alias, `{typography.mono-strong}`, centered on `{colors.surface-2}`.
+- Brand stripe: a 3px `{rounded.pill}` bar in the asset's extracted brand color, pinned to the top edge of `{component.asset-card}` — or a 3px left border on table rows. This is the fastest similarity-breaker and must never be omitted when a brand color exists.
+- Domain rendering: alias in `{typography.card-title}` + `{colors.ink}`; the domain below in `{typography.mono-data}` + `{colors.ink-muted}` with the TLD span in `{colors.ink-subtle}`. When two domains are similar, the differing segment gets a `{colors.primary-soft}` background and `{colors.primary-text}` text.
+- `{component.tag-chip}` for tags; `{component.tag-chip-accent}` only for the environment tag (`env:prod`). Cap visible tags at 3 plus a `+N`.
 
-**`text-input`** + **`text-input-focused`**
-- Default: background `{colors.canvas}`, text `{colors.ink}`, 1px solid `{colors.hairline}`, type `{typography.body-md}`, padding `12px 16px`, height `44px`, rounded `{rounded.sm}`.
-- Focused: same surface, border becomes 2px solid `{colors.primary}` — the green border is the only focus signal in the system.
+### Status
 
-**`search-input`**
-- Used in the global search overlay — same treatment as `text-input` but at 40px height with a magnifier glyph at left.
+- `{component.status-badge}` — neutral chip (`{colors.surface-2}` + `{colors.ink-muted}`) with a leading dot. The dot alone carries color: `{component.status-dot-success}`, `{component.status-dot-warning}`, `{component.status-dot-danger}`, `{component.status-dot-idle}`. Never color the chip text; this keeps contrast safe and stops the UI from looking like a traffic light. When a dot alone is too quiet, `{component.status-chip-success}`, `{component.status-chip-warning}`, and `{component.status-chip-danger}` wash the chip with the 12% soft color while the label stays neutral.
 
-### Cards
+### Overlays & feedback
 
-**`product-card`**
-- Container: background `{colors.canvas}`, 1px solid `{colors.hairline}`, padding `{spacing.xl}` (24px), rounded `{rounded.sm}`.
-- Layout: 16:9 product image at top, `{typography.card-title}` title, `{typography.body-sm}` description, `{component.button-ghost-link}` "Learn More →" affordance at bottom.
-- The `{component.corner-square}` sits at the top-left corner.
+- `{component.modal}` — create/edit forms and confirmations. `{colors.surface-3}`, `{rounded.xl}`, `{spacing.lg}` padding, title in `{typography.section-title}`, actions right-aligned with the primary action last.
+- `{component.drawer}` — 360px right-side panel for quick edits and asset pickers on desktop; becomes a full-screen sheet below 768px.
+- `{component.toast}` — bottom-right, `{colors.surface-3}`, with a 3px semantic left stripe (`{colors.success}`, `{colors.danger}`). Auto-dismiss 4s; never stack more than 3.
+- `{component.tooltip}` — `{colors.surface-3}`, `{typography.caption}`, 200ms delay, for icon-only buttons and truncated values.
+- `{component.empty-state}` — icon at 32px in `{colors.ink-faint}`, one `{typography.body}` sentence in `{colors.ink-muted}`, one `{component.button-secondary}` action. Empty states teach the next action; they never fill space with illustration.
+- `{component.skeleton}` — 12px `{colors.surface-2}` bars, no shimmer animation. Loading is quiet.
 
-**`feature-card`**
-- Container: background `{colors.canvas}`, 1px solid `{colors.hairline}`, padding `{spacing.xxl}` (32px), rounded `{rounded.sm}`.
-- Layout: icon (Font Awesome at 22–24px) at top in `{colors.primary}` followed by `{typography.heading-md}` title and `{typography.body-md}` body.
-- Used in 3-up or 4-up grids that explain product capabilities ("Agentic AI", "Data Science", "Inference", "Conversational AI").
+### Auth screen
 
-**`resource-card`**
-- Container: background `{colors.canvas}`, 1px solid `{colors.hairline}`, padding `{spacing.xl}`, rounded `{rounded.sm}`.
-- Header strip: `{component.badge-tag}` document-type label.
-- Body: 3:2 thumbnail, `{typography.card-title}` title, `{typography.body-sm}` description.
-- Footer: ghost-link "Read More →" with right-pointing chevron in `{colors.primary}`.
+The login screen is the one surface without the app shell: no sidebar, no topbar, just `{component.login-card}` centered on `{colors.canvas}` (max width 360px, `{spacing.lg}` 24px page padding).- The card opens with the same brand lockup used in `{component.sidebar}` — 16px `{colors.primary}` square plus the wordmark — followed by a `{typography.page-title}` heading and one `{typography.caption}` sentence in `{colors.ink-subtle}`.
+- Fields use `{component.login-input}` (36px — one step taller than in-app controls to accommodate touch and password managers); only one field in login mode, two in first-run setup mode.
+- The submit is a full-width `{component.button-primary}`. Errors render in `{colors.danger}` at `{typography.caption}` above the button; never use toasts, shake animations, or red fills here.
+- No marketing copy, no illustration, no "remember me", no username field — the product is single-user and the password is the only credential.
+- The footer is a single `{colors.ink-faint}` mono line ("仅限本人使用"), outside the card.
 
-**`callout-stat`**
-- Background `{colors.canvas}` with 1px hairline `{colors.hairline}`, padding `{spacing.xxl}`, rounded `{rounded.sm}`.
-- Massive `{typography.display-lg}` (36px) numeric in `{colors.primary}` followed by `{typography.body-md}` caption underneath ("4× faster training", "60% lower cost", etc.). Used inside long-form industry pages.
+### Server status
 
-### Hero & CTA Strips
-
-**`hero-card-dark`**
-- Background `{colors.surface-dark}` with full-bleed 16:9 photographic/3D image and dark gradient overlay; copy slot at left.
-- `{typography.display-xl}` headline `{colors.on-dark}`, `{typography.heading-lg}` subhead, single `{component.button-primary}` CTA (sometimes paired with `{component.button-outline-on-dark}`).
-- Anchors the top of every primary landing page.
-
-**`cta-strip-dark`**
-- Same surface as hero but compressed to a 1-row band with `{typography.heading-xl}` headline + single CTA.
-- Sits between content sections as a "Ready to get started?" bridge.
-
-### Decorative
-
-**`corner-square`**
-- 12×12px solid `{colors.primary}` square anchored to a card corner. The brand's signature ornamental motif.
-- Used on resource cards, feature cards, and editorial callouts. Position varies (top-left, bottom-right) but the size and color are constant.
-
-### Navigation
-
-**`utility-bar`**
-- Background `{colors.surface-dark}`, text `{colors.on-dark}`, height 32px, type `{typography.caption-sm}`, rounded `{rounded.none}`.
-- Right-aligned cluster: locale selector / "Login" / "Account". Always present at the very top of the page.
-
-**`primary-nav`**
-- Background `{colors.surface-dark}`, text `{colors.on-dark}`, height 64px, type `{typography.body-strong}`, rounded `{rounded.none}`.
-- Layout: NVIDIA wordmark at left, centered nav row ("Products / Solutions / Industries / Resources / Support / Company"), right cluster (search-glyph + "Login" button + green CTA "Get Started").
-
-**`breadcrumb-bar`**
-- Background `{colors.surface-soft}`, text `{colors.body}`, height 48px, type `{typography.caption-md}` (uppercase).
-- Sits directly under the primary nav on every interior page; chevron separators in `{colors.mute}`.
-
-**`sub-nav-strip`**
-- Background `{colors.surface-soft}`, text `{colors.ink}`, height 56px, type `{typography.button-md}`, rounded `{rounded.none}`.
-- Section-specific nav anchored above content (e.g., "Healthcare → Drug Discovery / Medical Imaging / Genomics / Patient Care").
-
-**Top Nav (Mobile)**
-- Hamburger menu icon (left), NVIDIA wordmark (center), search + locale icons (right). Primary nav collapses into a full-screen drawer that slides in from the right.
-
-### Footer
-
-**`footer-section`**
-- Background `{colors.surface-dark}`, text `{colors.on-dark-mute}`, padding `{spacing.section}` (64px) vertical / 48px horizontal, rounded `{rounded.none}`.
-- Layout: 6-column link grid (Products / Software / Resources / Company Info / Solutions / Support) with column headers in `{typography.body-strong}` `{colors.on-dark}` and link lists in `{typography.body-sm}` `{colors.on-dark-mute}`.
-- Below the columns: social-icon strip + locale selector + legal/privacy fine-print row in `{typography.utility-xs}` (uppercase) `{colors.mute}`.
-
-### Inline
-
-**`link-inline`**
-- Body-prose anchor link: `{colors.link-blue}` text with underline. The ONLY blue in the system — appears nowhere except inline links inside `{typography.body-md}` paragraphs.
+- The status line is 12px `{colors.ink-muted}` with a leading `{component.status-dot-success}` / `{component.status-dot-danger}` dot, showing load and uptime in `{typography.mono-data}`.
+- `{component.meter}` is the 4px pill track; the fill is `{component.meter-fill}` at normal load, `{component.meter-fill-warning}` at ≥75%, and `{component.meter-fill-danger}` at ≥90%. Meters carry no text; the percentage sits right-aligned in `{typography.mono-data}`.
+- Renewal chips reuse `{component.tag-chip}` with a semantic dot: `{component.status-dot-warning}` within 30 days, `{component.status-dot-danger}` within 7 days.
+- These blocks live inside the `{component.asset-card}` meta area and are read-only telemetry from the Komari connector — never interactive.
 
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{colors.primary}` for primary CTAs, active states, decorative corner squares, and the NVIDIA wordmark itself. Treat it as a precious resource.
-- Stack hero/footer chapters in `{colors.surface-dark}` and body sections in `{colors.canvas}` — alternate them in a predictable rhythm down the page.
-- Anchor a `{component.corner-square}` to one corner of every reusable card. It is the system's identity tag.
-- Use `{rounded.sm}` (2px) on every interactive element. Never go to 0, never go past 4.
-- Build hierarchy from font weight (400 vs 700) and size, not from color tinting. Body text stays `{colors.ink}` or `{colors.body}` regardless of context.
-- Stack content sections at `{spacing.section}` (64px) rhythm with no decorative dividers between them.
-- Pair `{component.button-primary}` (green fill) with `{component.button-outline}` (green border) for primary + secondary action pairs.
+
+- Keep the shell fixed and scroll only the content column.
+- Use `{colors.primary}` for exactly one primary action per view, plus selection/focus.
+- Use the surface ladder and `{colors.hairline}` for depth; keep shadows for level-3 layers only.
+- Render every machine identifier in `{typography.mono-data}` with `{colors.ink-muted}` or lighter.
+- Give every asset an icon tile and, when available, a brand stripe.
+- Use `{component.status-badge}` with a colored dot instead of colored text.
+- Keep controls at 32px, rows at 44px, and body at 13–14px.
+- Show keyboard shortcuts in `{component.kbd}` wherever the palette is mentioned.
 
 ### Don't
-- Don't introduce drop shadows on cards or content surfaces. The only allowed shadow is the 5px ambient on sticky chrome.
-- Don't substitute `{colors.success-deep}`, `{colors.accent-green-pale}`, or any other green for `{colors.primary}` in CTAs. The brand green is precise.
-- Don't use `{colors.link-blue}` outside of inline body-prose links. It is not a button color, not a chrome color.
-- Don't soften the geometry. No pill buttons, no rounded cards, no `{rounded.lg}` or higher anywhere except avatars and social icons.
-- Don't pad the hero `{component.hero-card-dark}` symmetrically. Copy hugs the left third; imagery fills the right.
-- Don't add a second accent color for variety. The system is intentionally one-color.
-- Don't put `{component.button-primary}` on a `{colors.canvas}` background where green-on-white would clash with photo content — use `{component.button-outline}` instead and reserve fill for dark surfaces.
+
+- Don't build a landing page: no hero, no scroll-narrative, no section bands, no 48px display type.
+- Don't add a light mode; the console is dark-only.
+- Don't use gradients, glow, glassmorphism, or colored shadows.
+- Don't use solid red buttons or colored body text for status.
+- Don't use pill-shaped buttons or pill nav items.
+- Don't put more than one indigo CTA in a viewport.
+- Don't hide critical actions behind hover only.
+- Don't use opacity to disable controls; use `{component.button-disabled}` tokens.
 
 ## Responsive Behavior
 
-### Breakpoints
-
 | Name | Width | Key Changes |
 |---|---|---|
-| ultrawide | 1920px+ | Content max-width holds at 1280px; outer gutters grow to ~80px |
-| desktop-large | 1440px | Default desktop layout — 4-up card grid, 6-col footer |
-| desktop | 1280px | Same as large with slightly narrower outer gutters |
-| desktop-small | 1024px | 4-up cards collapse to 3-up; sub-nav remains horizontal |
-| tablet | 768px | 3-up cards collapse to 2-up; primary nav becomes hamburger drawer |
-| mobile | 480px | Single-column everything; footer columns collapse to accordion |
-| mobile-narrow | 320px | Hero `{typography.display-xl}` scales from 48px → 32px |
+| Desktop | ≥ 1280px | Full shell: 232px sidebar, tables default, detail as page |
+| Laptop | 1024–1279px | Sidebar collapses to a 64px icon rail (labels in `{component.tooltip}`); content max width drops to fluid |
+| Tablet | 768–1023px | Icon rail moves to a topbar menu; card grids 2-up |
+| Mobile | < 768px | Bottom tab bar (总览/域名/服务/服务器); topbar holds brand + search; cards 1-up; `{component.drawer}` becomes full-screen; tables convert to `{component.asset-card}` lists |
 
-### Touch Targets
-All interactive elements meet WCAG AA (≥ 44×44px). `{component.button-primary}` sits at 44px height with 24px horizontal padding. `{component.text-input}` sits at 44px. `{component.pill-tab}` sits at ~40px height with extended hit-target padding to 44px. `{component.button-outline}` matches the 44px standard. Footer links are 18–20px line-height with 8–12px vertical padding to keep tap targets at ~36–44px depending on link length.
+- Touch targets: minimum 44px effective height on mobile; controls keep 32px visual height inside a 44px hit area.
+- The command palette becomes a full-screen sheet below 768px.
+- Tables never scroll horizontally: columns drop (servers table loses region, domains table loses registrar) before anything overflows.
+- Long domains truncate from the left (`…` before the registrable name) so the unique part stays visible; full value lives in `{component.tooltip}`.
 
-### Collapsing Strategy
-- **Primary nav:** desktop center cluster → tablet hamburger drawer at 768px.
-- **Card grid:** 4-up → 3-up → 2-up → 1-up at 1024, 768, and 480px; gutters drop from 24px to 16px on mobile.
-- **Footer:** 6-up link columns → 2-up at tablet → full accordion at mobile (each column header becomes a tap-to-expand row).
-- **Hero copy:** desktop `{typography.display-xl}` (48px) → tablet 36px → mobile 32px; line-height holds at 1.25.
-- **Sub-nav strip:** desktop horizontal anchor row → tablet horizontal scroll → mobile collapses into a select dropdown.
-- **Section padding:** `{spacing.section}` (64px) desktop → 48px tablet → 32px mobile.
-- **Long-form text:** desktop 60/40 body+sidebar → tablet/mobile single-column with sidebar pushed to the bottom.
+## Accessibility
 
-### Image Behavior
-- Hero imagery uses art-direction crops: 16:9 wide hero on desktop swaps to 4:5 portrait on mobile so the subject stays centered and headline text still has overlay space.
-- Card imagery is a fixed aspect (16:9 for resource, 1:1 for product) that scales rather than re-crops between breakpoints.
-- All non-critical imagery is lazy-loaded as the user scrolls into the next grid row.
+- Body text (`{colors.ink}`, `{colors.ink-muted}`) on `{colors.canvas}`/`{colors.surface-1}` must hold ≥ 4.5:1; `{colors.ink-subtle}` is allowed only at `{typography.caption}` size or larger metadata.
+- Focus is always visible: 2px `{colors.primary-soft}` halo with a 1px `{colors.primary}` border, applied via `:focus-visible`.
+- Status color is never the only signal — every `{component.status-dot-*}` pairs with a text label.
+- Respect `prefers-reduced-motion`: transitions drop to 0ms; the only motion in the product is 120–160ms ease-out on overlays and toggles.
+- All interactive elements are reachable by keyboard; the command palette traps focus and restores it on close.
 
 ## Iteration Guide
 
-1. Focus on ONE component at a time. Pull its YAML entry from the front matter and verify every property resolves.
-2. Reference component names and tokens directly (`{colors.primary}`, `{component.button-primary-active}`, `{rounded.sm}`) — do not paraphrase.
-3. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
-4. Add new variants as separate component entries (`-active`, `-disabled`, `-focused`) — do not bury them inside prose.
-5. Default body to `{typography.body-md}`; reach for `{typography.body-strong}` for emphasis; reserve `{typography.display-xl}` strictly for hero chapter headlines.
-6. Keep `{colors.primary}` scarce per viewport — if more than one solid-green CTA appears in the same fold, neutralize one to `{component.button-outline}`.
-7. When introducing a new component, ask whether it can be expressed with the existing card + 2px-radius + corner-square + green-CTA vocabulary before adding new tokens. The system's strength is that it almost never needs new ones.
+1. Focus on one component at a time and reference it by its `components:` token name.
+2. Before adding a screen, decide which shell region it lives in (sidebar, topbar, content, overlay) — never invent a new page structure.
+3. Default to `{typography.body}` at `{colors.ink}`; reach for `{colors.ink-muted}` for secondary and `{colors.ink-subtle}` for metadata.
+4. New colors require resigning the accent singleton rule; prefer the existing surface ladder.
+5. Run `npx @google/design.md lint DESIGN.md` after edits — `broken-ref`, `contrast-ratio`, and `orphaned-tokens` warnings flag issues automatically.
+6. Add variants as separate component entries (`-hover`, `-active`, `-disabled`), never as prose-only states.
+7. When a screen starts to feel like a landing page, delete the decoration and check whether the shell was violated.
 
 ## Known Gaps
 
-- **Mobile screenshots not captured** — responsive behavior synthesizes NVIDIA's known mobile pattern (hamburger drawer, accordion footer, 1-up card grid, hero downscale) from desktop evidence and the documented breakpoint stack.
-- **Hover states not documented** by system policy.
-- **Dialog / modal styling** beyond the locale-selector overlay not visible in the captured surfaces.
-- **Form field styling** for full sign-up / contact forms is not present in the captured surfaces — only inline search and basic text inputs are documented.
-- **Login / authenticated chrome** not in the captured pages.
+- Light mode is intentionally undocumented — the product is dark-only.
+- Data-visualization colors (charts, sparklines) are reserved for the deferred monitoring milestone and are not part of this system yet.
+- Print styles are out of scope.
+- The favicon-to-brand-color extraction algorithm is an implementation detail; the system only specifies the stripe and monogram fallbacks.
+- Motion beyond overlay transitions (e.g., drag interactions) is not specified.
