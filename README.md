@@ -22,7 +22,7 @@ docker compose up -d --build
 - 容器端口只绑定本机 `127.0.0.1:3080`，由宿主机 nginx 反代对外；未知域名在 443 上会被拒绝握手，不会误落到面板。
 - `./public` 以 bind mount 挂载，改前端文件后刷新页面即可，无需重建镜像。
 - `CF_API_TOKEN` 环境变量可选；也可在面板「设置」中保存（存于 `data.json`）。
-- `nginx.conf` 是外部反向代理的参考配置，Docker 镜像内不含 nginx，容器直接运行 Node。
+- `nginx.conf` 是宿主机反代的参考配置（面板站点 + 未知域名拒绝握手 + 新服务上线模板），Docker 镜像内不含 nginx；迁移机器时按文件头部注释复制到 `sites-available` 即可。
 
 ## Komari 监控联动（只读）
 
