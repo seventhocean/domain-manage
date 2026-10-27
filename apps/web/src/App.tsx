@@ -13,6 +13,7 @@ import {
   Layers,
   LayoutDashboard,
   LogOut,
+  Plus,
   RefreshCw,
   Search,
   Server,
@@ -112,79 +113,96 @@ function Shell() {
     )
     .slice(0, 12);
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <Link to="/" className="brand">
-          <span className="brand-symbol">
-            <Boxes size={20} />
-          </span>
-          <span>
-            资源台<small>个人 CMDB</small>
-          </span>
-        </Link>
-        <div className="workspace-label">个人工作空间</div>
-        <nav>
-          <NavLink to="/" end>
-            <LayoutDashboard size={17} />
-            <span>总览</span>
-          </NavLink>
-          <NavLink to="/projects">
-            <FolderKanban size={17} />
-            <span>项目</span>
-          </NavLink>
-          <NavLink
-            to="/resources"
-            className={({ isActive }) =>
-              isActive && !typeParams.get("type") ? "active" : ""
-            }
-          >
-            <Boxes size={17} />
-            <span>全部资源</span>
-            <em>{resources.length}</em>
-          </NavLink>
-        </nav>
-        <div className="nav-section-label">资源分类</div>
-        <nav className="type-nav">
-          {resourceTypes.map((type) => {
-            const Icon = typeIcons[type];
-            return (
-              <Link
-                key={type}
-                to={`/resources?type=${type}`}
-                className={
-                  location.pathname === "/resources" &&
-                  typeParams.get("type") === type
-                    ? "active"
-                    : ""
-                }
-              >
-                <Icon size={16} />
-                <span>{typeLabels[type]}</span>
-                <em>
-                  {resources.filter((r) => r.type === type).length || "—"}
-                </em>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="sidebar-bottom">
-          <nav>
-            <NavLink to="/integrations">
-              <RefreshCw size={17} />
-              <span>同步中心</span>
+    <div className="orbit-app">
+      {/* 现代沉浸式玻璃顶栏 (彻底告别笨重运维侧边栏) */}
+      <header className="orbit-navbar">
+        <div className="orbit-navbar-inner">
+          <Link to="/" className="orbit-brand">
+            <span className="orbit-brand-orb">
+              <Boxes size={18} />
+            </span>
+            <div className="orbit-brand-text">
+              <span className="orbit-brand-name">Orbit</span>
+              <span className="orbit-brand-sub">数字展厅</span>
+            </div>
+          </Link>
+
+          {/* 核心主导航 Pills */}
+          <nav className="orbit-nav-links">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `orbit-nav-item ${isActive ? "active" : ""}`
+              }
+            >
+              <LayoutDashboard size={15} />
+              <span>展厅</span>
             </NavLink>
-            <NavLink to="/settings">
-              <Settings size={17} />
-              <span>设置与数据</span>
+            <NavLink
+              to="/resources"
+              className={({ isActive }) =>
+                `orbit-nav-item ${isActive && !typeParams.get("type") ? "active" : ""}`
+              }
+            >
+              <Boxes size={15} />
+              <span>台账</span>
+              <em className="orbit-nav-count">{resources.length}</em>
+            </NavLink>
+            <NavLink
+              to="/projects"
+              className={({ isActive }) =>
+                `orbit-nav-item ${isActive ? "active" : ""}`
+              }
+            >
+              <FolderKanban size={15} />
+              <span>项目</span>
+            </NavLink>
+            <NavLink
+              to="/integrations"
+              className={({ isActive }) =>
+                `orbit-nav-item ${isActive ? "active" : ""}`
+              }
+            >
+              <RefreshCw size={15} />
+              <span>同步</span>
             </NavLink>
           </nav>
-          <div className="workspace-person">
-            <span className="person-avatar">W</span>
-            <div>
-              我的资源空间<small>单用户 · 本地持久化</small>
-            </div>
+
+          {/* 右侧全局操作区 */}
+          <div className="orbit-navbar-right">
             <button
-              className="icon-action"
+              type="button"
+              className="orbit-search-btn"
+              onClick={() => {
+                setSearch("");
+                setPalette(true);
+              }}
+            >
+              <Search size={14} />
+              <span>搜索资产…</span>
+              <kbd>⌘K</kbd>
+            </button>
+
+            <Button
+              onClick={() => setCreate("service")}
+              className="orbit-add-btn"
+            >
+              <Plus size={14} />
+              <span>录入资产</span>
+            </Button>
+
+            <NavLink
+              to="/settings"
+              className="orbit-icon-btn"
+              title="设置与数据"
+            >
+              <Settings size={16} />
+            </NavLink>
+
+            <button
+              type="button"
+              className="orbit-icon-btn"
               title="退出登录"
               onClick={async () => {
                 await api("/api/auth/logout", json("POST"));
@@ -192,34 +210,18 @@ function Shell() {
                 navigate("/login");
               }}
             >
-              <LogOut size={15} />
+              <LogOut size={16} />
             </button>
+
+            <div className="orbit-user-pill" title="单用户 · 本地持久化">
+              <span className="orbit-avatar">W</span>
+            </div>
           </div>
         </div>
-      </aside>
-      <header className="topbar">
-        <div className="breadcrumbs">
-          <span>工作空间</span>
-          <ChevronRight size={13} />
-          <strong>{page}</strong>
-        </div>
-        <button
-          className="search-trigger"
-          onClick={() => {
-            setSearch("");
-            setPalette(true);
-          }}
-        >
-          <Search size={15} />
-          <span>搜索所有资源</span>
-          <kbd>⌘ K</kbd>
-        </button>
-        <span className="private-label">
-          <i className="dot active" />
-          个人空间
-        </span>
       </header>
-      <main id="main-content" className="content">
+
+      {/* 主画布内容区 */}
+      <main id="main-content" className="orbit-main">
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route
@@ -309,7 +311,7 @@ function Shell() {
                   navigate(`/resources/${r.id}`);
                 }}
               >
-                <ResourceIcon type={r.type} />
+                <ResourceIcon type={r.type} resource={r} />
                 <span>
                   {r.name}
                   <small>{primaryValue(r)}</small>

@@ -25,6 +25,7 @@ import {
   relativeTime,
   ResourceIcon,
   Status,
+  TagBadge,
 } from "../../components/resource";
 import { Button } from "../../components/ui/button";
 import { detailFields, ResourceForm } from "../../features/resources/form";
@@ -84,7 +85,7 @@ export function ResourcePage() {
         {typeLabels[r.type]}台账
       </Link>
       <div className="detail-header">
-        <ResourceIcon type={r.type} />
+        <ResourceIcon type={r.type} resource={r} size={24} />
         <div>
           <div className="eyebrow">
             {typeLabels[r.type]}
@@ -274,9 +275,7 @@ export function ResourcePage() {
                 <div className="chip-row">
                   {r.tags.length ? (
                     r.tags.map((tag) => (
-                      <span className="chip" key={tag}>
-                        {tag}
-                      </span>
+                      <TagBadge key={tag} tag={tag} size="md" />
                     ))
                   ) : (
                     <span className="muted">暂无标签</span>
@@ -336,7 +335,7 @@ export function ResourcePage() {
                 return (
                   <div className="simple-row relation-row" key={rel.id}>
                     {target ? (
-                      <ResourceIcon type={target.type} />
+                      <ResourceIcon type={target.type} resource={target} />
                     ) : (
                       <Link2 size={18} />
                     )}
@@ -401,7 +400,7 @@ export function ResourcePage() {
                 );
                 return (
                   <div className="simple-row" key={dep.id}>
-                    <ResourceIcon type={target?.type || "host"} />
+                    <ResourceIcon type={target?.type || "host"} resource={target || undefined} />
                     <div>
                       {target ? (
                         <Link to={`/resources/${target.id}`}>

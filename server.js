@@ -219,7 +219,7 @@ export function createLegacyApp(options = {}) {
     });
 
   // --- Middleware ---
-  app.use(express.json({ limit: "1mb" }));
+  app.use(express.json({ limit: "15mb" }));
   options.publicMiddleware?.(app);
   app.use((req, res, next) => {
     if (
@@ -227,7 +227,17 @@ export function createLegacyApp(options = {}) {
       req.headers.origin
     ) {
       try {
-        if (new URL(req.headers.origin).host !== req.headers.host)
+        const originUrl = new URL(req.headers.origin);
+        const reqHost = req.headers["x-forwarded-host"] || req.headers.host;
+        const isLocalDev =
+          (originUrl.hostname === "localhost" ||
+            originUrl.hostname === "127.0.0.1" ||
+            originUrl.hostname.startsWith("192.168.") ||
+            originUrl.hostname.startsWith("10.") ||
+            originUrl.hostname.startsWith("172.")) &&
+          (req.hostname === "localhost" || req.hostname === "127.0.0.1");
+
+        if (!isLocalDev && originUrl.host !== reqHost)
           return res.status(403).json({ error: "请求来源不匹配" });
       } catch {
         return res.status(403).json({ error: "请求来源无效" });
@@ -571,6 +581,27 @@ export function createLegacyApp(options = {}) {
       });
       res.json({ filename, url: `/covers/${filename}` });
     },
+  );
+
+  // Generic upload for clipboard screenshots or covers
+  app.post(
+    "/api/cmdb/upload",
+    coverUpload.single("file"),
+    (req, res) => {
+      if (req.file) {
+        return res.json({ url: `/covers/${req.file.filename}` });
+      }
+      if (req.body?.base64 && typeof req.body.base64 === "string") {
+        const match = req.body.base64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+        if (match) {
+          const ext = `.${match[1].toLowerCase()}`;
+          const filename = `clip-${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
+          writeFileSync(join(COVERS_DIR, filename), Buffer.from(match[2], "base64"));
+          return res.json({ url: `/covers/${filename}` });
+        }
+      }
+      return res.status(400).json({ error: "未接收到图片数据" });
+    }
   );
 
   // --- API: Dashboard Stats ---

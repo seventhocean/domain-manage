@@ -7,12 +7,13 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import { Plus, Search } from "lucide-react";
+import { LayoutGrid, List, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { Resource, ResourceType } from "../../../../../packages/contracts";
 import {
   lifecycleLabels,
+  primaryResourceTypes,
   resourceTypes,
   typeLabels,
 } from "../../../../../packages/contracts";
@@ -22,6 +23,7 @@ import {
   primaryValue,
   relativeTime,
   ResourceIcon,
+  ShowcaseCard,
   Status,
 } from "../../components/resource";
 import { Button } from "../../components/ui/button";
@@ -35,6 +37,7 @@ export function ResourceList({
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const type = params.get("type") || "",
     q = params.get("q") || "",
     life = params.get("lifecycle") || "",
@@ -70,7 +73,7 @@ export function ResourceList({
         header: "资源名称",
         cell: ({ row }) => (
           <div className="table-identity">
-            <ResourceIcon type={row.original.type} />
+            <ResourceIcon type={row.original.type} resource={row.original} />
             <div>
               <Link to={`/resources/${row.original.id}`}>
                 {row.original.name}
@@ -171,7 +174,7 @@ export function ResourceList({
           onChange={(e) => update("type", e.target.value)}
         >
           <option value="">全部类型</option>
-          {resourceTypes.map((t) => (
+          {primaryResourceTypes.map((t) => (
             <option key={t} value={t}>
               {typeLabels[t]}
             </option>
@@ -209,8 +212,33 @@ export function ResourceList({
             清除筛选
           </Button>
         )}
+        <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
+          <Button
+            variant={viewMode === "card" ? "secondary" : "ghost"}
+            onClick={() => setViewMode("card")}
+            title="卡片展厅"
+          >
+            <LayoutGrid size={15} />
+            卡片
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "secondary" : "ghost"}
+            onClick={() => setViewMode("table")}
+            title="表格清单"
+          >
+            <List size={15} />
+            表格
+          </Button>
+        </div>
       </div>
       {filtered.length ? (
+        viewMode === "card" ? (
+          <div className="bento-grid">
+            {filtered.map((r) => (
+              <ShowcaseCard key={r.id} resource={r} />
+            ))}
+          </div>
+        ) : (
         <>
           <div className="table-container">
             <table className="resource-table">
@@ -268,7 +296,7 @@ export function ResourceList({
                 className="mobile-resource-card"
               >
                 <div>
-                  <ResourceIcon type={r.type} />
+                  <ResourceIcon type={r.type} resource={r} />
                   <strong>{r.name}</strong>
                   <Status value={r.lifecycle} />
                 </div>
@@ -278,6 +306,7 @@ export function ResourceList({
             ))}
           </div>
         </>
+        )
       ) : (
         <Empty
           title={query.data.length ? "没有匹配的资源" : "还没有资源"}

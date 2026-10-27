@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @theme {
-  --color-primary: #6c5ce7;
-  --color-canvas: #0a0a0b;
-  --color-surface: #101013;
+  --color-primary: #f6821f;
+  --color-primary-hover: #fa8c16;
+  --color-canvas: #0d0f14;
+  --color-surface: #131620;
   --color-ink: #f5f6f7;
   --font-sans:
     Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
@@ -14,13 +15,17 @@
   font-family: var(--font-sans);
   font-size: 13px;
   color: #f5f6f7;
-  background: #0a0a0b;
+  background: #0d0f14;
   font-synthesis: none;
   --muted: #8b8f99;
   --border: rgba(255, 255, 255, 0.08);
-  --surface: #101013;
-  --surface-2: #16161a;
-  --accent: #9b8dff;
+  --border-hover: rgba(246, 130, 31, 0.4);
+  --surface: #131620;
+  --surface-2: #181c28;
+  --surface-card: #141721;
+  --accent: #f6821f;
+  --accent-hover: #fa8c16;
+  --accent-soft: rgba(246, 130, 31, 0.15);
   color-scheme: dark;
 }
 * {
@@ -65,9 +70,9 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 1px solid #6c5ce7;
+  outline: 1px solid #f6821f;
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.16);
+  box-shadow: 0 0 0 3px rgba(246, 130, 31, 0.2);
 }
 h1,
 h2,
@@ -132,7 +137,7 @@ small {
   flex-shrink: 0;
 }
 .button-primary {
-  background: #6c5ce7;
+  background: #f6821f;
   color: #fff;
 }
 .button-primary:hover {
@@ -572,7 +577,7 @@ small {
 .distribution-track i {
   display: block;
   height: 100%;
-  background: #6c5ce7;
+  background: #f6821f;
   border-radius: 2px;
 }
 .panel-note {
@@ -847,7 +852,7 @@ small {
 }
 .detail-tabs button.active {
   color: #f5f6f7;
-  border-bottom-color: #6c5ce7;
+  border-bottom-color: #f6821f;
 }
 .detail-tabs span {
   font-family: var(--font-mono);
@@ -1162,7 +1167,7 @@ textarea {
   height: 14px;
   width: 14px;
   margin: 0;
-  accent-color: #6c5ce7;
+  accent-color: #f6821f;
 }
 .project-checkboxes {
   display: flex;
@@ -1914,6 +1919,988 @@ textarea {
     display: none;
   }
 }
+
+/* --- Showcase Gallery Cards (参考 ohmyppt.cc 宽画幅大卡片 + Cloudflare 橙活力体系) --- */
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 20px;
+}
+
+.showcase-card {
+  display: flex;
+  flex-direction: column;
+  background: #141722;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 180ms ease,
+              box-shadow 180ms ease;
+  position: relative;
+}
+
+.showcase-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(246, 130, 31, 0.45);
+  box-shadow: 0 12px 32px -4px rgba(246, 130, 31, 0.16),
+              0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* 16:10 宽画幅大封面 */
+.showcase-cover {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  position: relative;
+  overflow: hidden;
+  background: #0d0f15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.showcase-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 260ms ease, opacity 200ms ease;
+}
+
+.showcase-card:hover .showcase-cover img {
+  transform: scale(1.03);
+}
+
+.showcase-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(20,23,34,0.92) 100%);
+  pointer-events: none;
+}
+
+.showcase-cover-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.showcase-body {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #141722;
+}
+
+.showcase-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.showcase-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5f6f7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+  flex: 1;
+}
+
+.showcase-desc {
+  font-size: 12.5px;
+  color: #8b8f99;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.showcase-param-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0d0f15;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  margin-bottom: 12px;
+  color: #c6c9d0;
+}
+
+.showcase-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.showcase-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.showcase-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: rgba(246, 130, 31, 0.14);
+  color: #f6821f;
+  border: 1px solid rgba(246, 130, 31, 0.35);
+  transition: all 140ms ease;
+  white-space: nowrap;
+}
+
+.showcase-action-btn:hover {
+  background: #f6821f;
+  color: #ffffff;
+  border-color: #f6821f;
+  box-shadow: 0 2px 10px rgba(246, 130, 31, 0.35);
+}
+
+/* 分段切换按钮组 (Segmented Filter Bar) */
+.segmented-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #11131b;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 22px;
+  overflow-x: auto;
+}
+
+.segmented-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #8b8f99;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 120ms ease;
+  white-space: nowrap;
+}
+
+.segmented-pill:hover {
+  color: #f5f6f7;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.segmented-pill.active {
+  background: #f6821f;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(246, 130, 31, 0.3);
+}
+
+.segmented-count {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   Orbit Bento Hub 新设计语言 (个人数字空间 · 彻底摆脱传统运维风)
+   ========================================================================== */
+.orbit-app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: #090a0f;
+  background-image: 
+    radial-gradient(circle at 12% 0%, rgba(108, 92, 231, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 88% 0%, rgba(246, 130, 31, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(19, 22, 32, 0.7) 0%, transparent 60%);
+  color: #f5f6f7;
+}
+
+.orbit-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 60px;
+  background: rgba(9, 10, 15, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.orbit-navbar-inner {
+  max-width: 1440px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.orbit-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.orbit-brand-orb {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #f6821f 0%, #fa8c16 45%, #6c5ce7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(246, 130, 31, 0.4);
+}
+
+.orbit-brand-text {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.orbit-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.orbit-brand-sub {
+  font-size: 10.5px;
+  color: #8b8f99;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.orbit-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.orbit-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #8b8f99;
+  text-decoration: none;
+  transition: all 120ms ease;
+}
+
+.orbit-nav-item:hover {
+  color: #f5f6f7;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.orbit-nav-item.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.orbit-nav-count {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-style: normal;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.orbit-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.orbit-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  color: #8b8f99;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.orbit-search-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f6f7;
+  border-color: rgba(246, 130, 31, 0.35);
+}
+
+.orbit-search-btn kbd {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.orbit-add-btn {
+  background: #f6821f !important;
+  color: #fff !important;
+  height: 32px !important;
+  padding: 0 14px !important;
+  border-radius: 7px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 10px rgba(246, 130, 31, 0.35) !important;
+  transition: all 120ms ease !important;
+}
+
+.orbit-add-btn:hover {
+  background: #fa8c16 !important;
+  box-shadow: 0 4px 14px rgba(246, 130, 31, 0.45) !important;
+}
+
+.orbit-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8b8f99;
+  cursor: pointer;
+  transition: all 120ms ease;
+  text-decoration: none;
+}
+
+.orbit-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #f5f6f7;
+}
+
+.orbit-user-pill {
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.orbit-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #1f293d 0%, #312e81 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.orbit-main {
+  flex: 1;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px 24px 80px;
+}
+
+/* Bento Hero Banner */
+.bento-hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 24px 30px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(22, 25, 36, 0.6) 0%, rgba(13, 15, 22, 0.75) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.bento-hero-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(246, 130, 31, 0.5), transparent);
+}
+
+.bento-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: #f6821f;
+  margin-bottom: 6px;
+}
+
+.bento-hero-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: -0.4px;
+}
+
+.bento-hero-desc {
+  font-size: 13px;
+  color: #8b8f99;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.bento-stat-pills {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.bento-stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  transition: all 130ms ease;
+}
+
+.bento-stat-pill:hover,
+.bento-stat-pill.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(246, 130, 31, 0.4);
+  transform: translateY(-1px);
+}
+
+.bento-stat-pill.active {
+  box-shadow: 0 0 14px rgba(246, 130, 31, 0.2);
+}
+
+.bento-stat-pill-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-stat-pill-val {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.bento-stat-pill-label {
+  font-size: 11px;
+  color: #8b8f99;
+  margin-top: 2px;
+}
+
+/* Bento Filter Bar */
+.bento-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.bento-category-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 20, 28, 0.8);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow-x: auto;
+}
+
+.bento-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #8b8f99;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 120ms ease;
+  white-space: nowrap;
+}
+
+.bento-category-pill:hover {
+  color: #f5f6f7;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bento-category-pill.active {
+  background: #f6821f;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(246, 130, 31, 0.35);
+}
+
+.bento-pill-count {
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.bento-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bento Grid & Card */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.bento-card {
+  display: flex;
+  flex-direction: column;
+  background: #12141d;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.bento-card:hover {
+  border-color: rgba(246, 130, 31, 0.45);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(246, 130, 31, 0.12);
+}
+
+.bento-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9.5;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bento-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bento-hero-ambient {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bento-hero-glow {
+  position: absolute;
+  top: -20%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.bento-hero-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.bento-hero-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.bento-hero-main-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+  word-break: break-all;
+}
+
+.bento-hero-subspecs {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: rgba(255, 255, 255, 0.85);
+  display: block;
+}
+
+.bento-hero-provider {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+}
+
+.bento-hero-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.bento-hero-badge-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bento-hero-badge-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bento-flag-pill {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(10px);
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bento-provider-pill {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bento-price-pill {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.22);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-weight: 600;
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  font-family: var(--font-mono);
+}
+
+.bento-cf-pill {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(246, 130, 31, 0.22);
+  backdrop-filter: blur(10px);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #fb923c;
+  border: 1px solid rgba(246, 130, 31, 0.45);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+}
+
+.bento-body {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #141722;
+}
+
+.bento-body-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.bento-body-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #f5f6f7;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.bento-body-title:hover {
+  color: #f6821f;
+}
+
+.bento-purpose {
+  font-size: 12.5px;
+  color: #8b8f99;
+  line-height: 1.45;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 36px;
+}
+
+.bento-param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0d0f15;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+}
+
+.bento-param-val {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 170px;
+}
+
+.bento-param-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bento-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.bento-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.bento-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.bento-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bento-tag {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 130ms cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1.1;
+  white-space: nowrap;
+  letter-spacing: -0.1px;
+}
+
+.bento-tag:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.25);
+}
+
+.bento-tag.active {
+  box-shadow: 0 0 10px currentColor;
+  outline: 1.5px solid currentColor;
+  filter: brightness(1.15);
+}
+
+.bento-tag-md {
+  font-size: 11.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.bento-tag-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.7;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.bento-tag-del:hover {
+  opacity: 1;
+}
+
+.bento-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bento-launch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(246, 130, 31, 0.15);
+  color: #f6821f;
+  border: 1px solid rgba(246, 130, 31, 0.35);
+  text-decoration: none;
+  transition: all 120ms ease;
+}
+
+.bento-launch-btn:hover {
+  background: #f6821f;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(246, 130, 31, 0.35);
+}
+
+.bento-detail-btn {
+  font-size: 11.5px;
+  color: #8b8f99;
+  padding: 4px 8px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: all 120ms ease;
+}
+
+.bento-detail-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 768px) {
+  .bento-hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .orbit-navbar-inner {
+    padding: 0 16px;
+  }
+  .orbit-nav-links {
+    display: none;
+  }
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

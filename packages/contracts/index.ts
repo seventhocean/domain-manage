@@ -11,15 +11,25 @@ export const resourceTypes = [
   "account",
   "other",
 ] as const;
+
+// 个人网络资产 5 大核心类型（去掉工业软件级死板分类）
+export const primaryResourceTypes = [
+  "service",
+  "host",
+  "domain",
+  "subscription",
+  "account",
+] as const;
+
 export const typeLabels: Record<ResourceType, string> = {
-  domain: "域名",
-  host: "主机",
-  service: "服务",
+  service: "在线服务 / 工具",
+  host: "云服务器 / VPS",
+  domain: "域名资产",
+  subscription: "API 与付费服务",
+  account: "常用平台 / 账号",
   database: "数据库",
   storage: "存储",
   cloud: "云资源",
-  subscription: "订阅与 API",
-  account: "平台账号",
   other: "其他资源",
 };
 export type ResourceType = (typeof resourceTypes)[number];
