@@ -1,15 +1,55 @@
 {
   "name": "domain-manage",
-  "version": "0.1.0",
-  "description": "个人产品 & 域名管理面板",
+  "version": "0.2.0",
+  "description": "个人在线资源 CMDB",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node dist/apps/api/src/server.js",
+    "dev": "concurrently -k -n api,web \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch apps/api/src/server.ts",
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "tsc -p tsconfig.server.json",
+    "build:web": "vite build --config apps/web/vite.config.ts",
+    "typecheck": "tsc -p tsconfig.server.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
+    "migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "express": "^5.1.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4",
+    "@tanstack/react-query": "^5.90.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@radix-ui/react-dialog": "^1.3.1",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "lucide-react": "^0.468.0",
+    "react-hook-form": "^7.62.0",
+    "@hookform/resolvers": "^5.2.1",
+    "zod": "^4.1.0",
+    "drizzle-orm": "^0.45.4",
+    "better-sqlite3": "^13.0.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "tsx": "^4.20.5",
+    "vite": "^8.3.5",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/express": "^5.0.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "concurrently": "^9.2.0"
   }
 }

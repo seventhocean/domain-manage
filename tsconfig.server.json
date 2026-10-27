@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": ["node"]
+  },
+  "include": [
+    "apps/api/src/**/*.ts",
+    "packages/contracts/**/*.ts",
+    "scripts/**/*.ts",
+    "server.js",
+    "store.js",
+    "komari.js",
+    "probe.js"
+  ]
+}

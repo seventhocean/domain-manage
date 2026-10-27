@@ -1,0 +1,17 @@
+{
+  "mode": "built-in image_gen",
+  "version": 1,
+  "date": "2026-10-27",
+  "assets": [
+    {
+      "id": "resource-workspace",
+      "destination": "apps/web/public/art/resource-workspace-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: a reusable small empty-workspace illustration for a personal CMDB web application, on a genuinely transparent background. Primary request: convey that scattered online resources can be gathered into one orderly personal workspace. Subject: a compact miniature architectural assembly of three abstract resource modules — a low server block with precise slots, a short storage cylinder, and a standing circular domain ring — neatly fitted into a shallow modular organizing tray, with two fine violet connection bridges. Style/medium: refined architectural paper-and-ceramic maquette, precise isometric geometry, crisp silhouette, subtle tactile matte surfaces, restrained editorial product illustration. Composition: a single cohesive centered cluster, three-quarter isometric view, plenty of transparent padding, all objects fully visible, readable at 180 CSS pixels, square canvas. Color palette: cool ivory modules, graphite dark sides, a limited indigo-violet #6C5CE7 accent; calm enough for a near-black #0A0A0B app shell. Lighting: soft neutral studio light, local ambient occlusion only, clean edges, no background glow. Constraints: actual alpha transparency; no text, numbers, logos, UI panels, frames, people, watermarks, ground plane, checkerboard, stars, neon, glassmorphism or glossy toy surfaces. This is a conceptual illustration, not a real network diagram."
+    },
+    {
+      "id": "connect-source",
+      "destination": "apps/web/public/art/connect-source-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: a reusable data-source connection onboarding illustration for a personal CMDB web application, on a genuinely transparent background. Primary request: convey bringing an external source into a personal resource catalog through a calm, orderly read-only connection. Subject: two small architectural modules joined by one precise indigo-violet bridge: a cool ivory source tower containing three neatly inset horizontal plates, and a graphite receiving tray with three aligned ivory resource tiles. The bridge visibly links the two modules; use no arrows, labels, status symbols or locks. Style/medium: refined architectural paper-and-ceramic maquette, precise isometric geometry, crisp silhouette, subtle tactile matte surfaces, restrained editorial product illustration, consistent with the resource workspace art from this product. Composition: one cohesive centered cluster in three-quarter isometric view, generous transparent padding, all objects fully visible, readable at 180 CSS pixels, square canvas. Color palette: cool ivory, graphite dark sides, limited indigo-violet #6C5CE7 accent; intended for a near-black #0A0A0B app shell. Lighting: soft neutral studio light, local ambient occlusion only, clean edges, no glow. Constraints: actual alpha transparency; no text, numbers, logos, brands, UI panels, frames, people, watermarks, ground plane, checkerboard, stars, neon, glassmorphism or glossy toy surfaces. This illustration must not imply a verified connection status."
+    }
+  ]
+}

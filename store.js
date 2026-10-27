@@ -1,403 +1,304 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+// Compatibility API over the unified SQLite store. JSON is migration input only.
+import { join } from "node:path";
+import { encodeSetting, decodeSetting } from "./apps/api/src/db/secrets.js";
+import { sqlite, DATA_DIR } from "./apps/api/src/db/index.js";
+import {
+  listResources,
+  getResource,
+  saveResource,
+  trashResource,
+  getRelations,
+  addRelation,
+  removeRelation,
+  normalizeHostname,
+  deployments,
+  saveDeployment,
+  removeDeployment,
+} from "./apps/api/src/modules/resources.js";
+import { deploymentInputSchema } from "./packages/contracts/index.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_FILE = join(__dirname, 'data', 'data.json');
-const SCREENSHOTS_DIR = join(__dirname, 'data', 'screenshots');
-const COVERS_DIR = join(__dirname, 'data', 'covers');
-
-// --- Init ---
-function ensureDataDir() {
-  if (!existsSync(join(__dirname, 'data'))) mkdirSync(join(__dirname, 'data'), { recursive: true });
-  if (!existsSync(SCREENSHOTS_DIR)) mkdirSync(SCREENSHOTS_DIR, { recursive: true });
-  if (!existsSync(COVERS_DIR)) mkdirSync(COVERS_DIR, { recursive: true });
-}
-
-function defaultData() {
-  return { services: [], domains: [], servers: [], deployments: [], settings: { cf_api_token_set: false } };
-}
-
-function normalizeData(data) {
-  data.services = data.services || [];
-  data.domains = data.domains || [];
-  data.servers = data.servers || [];
-  data.deployments = data.deployments || [];
-  data.settings = data.settings || { cf_api_token_set: false };
-  return data;
-}
-
-function readData() {
-  ensureDataDir();
-  if (!existsSync(DATA_FILE)) {
-    writeFileSync(DATA_FILE, JSON.stringify(defaultData(), null, 2));
-    return defaultData();
-  }
-  return normalizeData(JSON.parse(readFileSync(DATA_FILE, 'utf-8')));
-}
-
-function writeData(data) {
-  ensureDataDir();
-  writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-
-function now() {
-  return new Date().toISOString();
-}
-
-// --- Services ---
-export function getServices() {
-  return readData().services;
-}
-
-export function getService(id) {
-  return readData().services.find(s => s.id === id) || null;
-}
-
-export function createService(service) {
-  const data = readData();
-  const s = {
-    id: uid(),
-    name: '',
-    cover_image: '',
-    domain: '',  // 逗号分隔的域名列表
-    notes: '',
-    status: 'running',
-    created_at: now(),
-    updated_at: now(),
-    ...service,
+export const SCREENSHOTS_DIR = join(DATA_DIR, "screenshots");
+export const COVERS_DIR = join(DATA_DIR, "covers");
+const lifecycleStatus = {
+  active: "running",
+  paused: "stopped",
+  retired: "stopped",
+  archived: "stopped",
+  planned: "maintenance",
+};
+function legacy(r) {
+  if (!r) return null;
+  const common = {
+    ...r.details,
+    id: r.id,
+    name: r.name,
+    notes: r.notes,
+    created_at: r.created_at,
+    updated_at: r.updated_at,
   };
-  data.services.push(s);
-  writeData(data);
-
-  // 自动关联域名
-  if (s.domain) {
-    autoAssociateDomains(s.id, s.domain);
-  }
-
-  return s;
+  if (r.type === "service")
+    return {
+      ...common,
+      status: lifecycleStatus[r.lifecycle],
+      domain: getRelations(r.id)
+        .filter((l) => l.kind === "uses_hostname" && l.source_id === r.id)
+        .map((l) => getResource(l.target_id))
+        .filter(Boolean)
+        .map((d) => d.details.domain)
+        .join(", "),
+    };
+  if (r.type === "domain")
+    return {
+      ...common,
+      domain: r.details.domain,
+      service_ids: getRelations(r.id)
+        .filter(
+          (l) =>
+            l.kind === "uses_hostname" &&
+            l.target_id === r.id &&
+            getResource(l.source_id),
+        )
+        .map((l) => l.source_id),
+    };
+  return common;
 }
-
-export function updateService(id, patch) {
-  const data = readData();
-  const idx = data.services.findIndex(s => s.id === id);
-  if (idx === -1) return null;
-
-  const oldService = data.services[idx];
-  data.services[idx] = { ...oldService, ...patch, updated_at: now() };
-  writeData(data);
-
-  // 如果域名发生变化，更新关联
-  if (patch.domain !== undefined && patch.domain !== oldService.domain) {
-    // 清除旧的关联
-    if (oldService.domain) {
-      autoAssociateDomains(id, '');
-    }
-    // 建立新的关联
-    if (patch.domain) {
-      autoAssociateDomains(id, patch.domain);
-    }
-  }
-
-  return data.services[idx];
-}
-
-export function deleteService(id) {
-  const data = readData();
-  const idx = data.services.findIndex(s => s.id === id);
-  if (idx === -1) return false;
-
-  const service = data.services[idx];
-
-  // 清除域名关联
-  if (service.domain) {
-    autoAssociateDomains(id, '');
-  }
-
-  // 清除部署记录
-  data.deployments = (data.deployments || []).filter(dep => dep.service_id !== id);
-
-  data.services.splice(idx, 1);
-  writeData(data);
-  return true;
-}
-
-// --- 自动关联域名 ---
-function autoAssociateDomains(serviceId, domainString) {
-  const data = readData();
-  const domainNames = domainString ? domainString.split(',').map(d => d.trim()).filter(d => d) : [];
-
-  // 清除该服务的所有旧关联
-  data.domains.forEach(d => {
-    d.service_ids = (d.service_ids || []).filter(sid => sid !== serviceId);
-  });
-
-  // 建立新关联
-  for (const domainName of domainNames) {
-    let domain = data.domains.find(d => d.domain === domainName);
-
-    if (!domain) {
-      // 创建新的域名记录
-      domain = {
-        id: uid(),
-        domain: domainName,
-        ip_address: '',
-        service_ids: [serviceId],
-        dns_provider: 'manual',
-        dns_status: 'inactive',
-        expiry_date: null,
-        ssl_status: 'unknown',
-        registrar: '',
-        notes: '',
-        created_at: now(),
-        updated_at: now(),
-      };
-      data.domains.push(domain);
-    } else {
-      // 添加服务关联（如果还没有）
-      if (!domain.service_ids.includes(serviceId)) {
-        domain.service_ids.push(serviceId);
-        domain.updated_at = now();
+const list = (type) =>
+  listResources()
+    .filter((r) => r.type === type)
+    .map(legacy);
+const get = (id, type) => {
+  const r = getResource(id);
+  return r?.type === type ? legacy(r) : null;
+};
+function save(type, patch, id) {
+  if (!patch || typeof patch !== "object" || Array.isArray(patch))
+    throw Object.assign(new Error("请求内容必须为对象"), { status: 400 });
+  return sqlite.transaction(() => {
+    const before = id ? getResource(id) : null;
+    if (id && before?.type !== type) return null;
+    const allowed = {
+      service: [
+        "name",
+        "notes",
+        "cover_image",
+        "screenshots",
+        "domain",
+        "status",
+        "probe",
+        "kind",
+        "title",
+        "auto_created",
+      ],
+      domain: [
+        "domain",
+        "alias",
+        "ip_address",
+        "dns_provider",
+        "dns_status",
+        "expiry_date",
+        "ssl_status",
+        "registrar",
+        "notes",
+        "service_ids",
+        "brand_color",
+        "probe",
+        "cf_zone_id",
+        "cf_records",
+        "address_source",
+      ],
+      host: [
+        "name",
+        "provider",
+        "ip",
+        "ssh_port",
+        "region",
+        "notes",
+        "komari_uuid",
+        "komari",
+      ],
+    }[type];
+    const clean = Object.fromEntries(
+      Object.entries(patch).filter(([key]) => allowed.includes(key)),
+    );
+    const details = { ...(before?.details || {}), ...clean };
+    delete details.service_ids;
+    if (type === "service") delete details.domain;
+    const name = String(
+      clean.name ||
+        clean.alias ||
+        before?.name ||
+        clean.domain ||
+        clean.ip ||
+        "未命名资源",
+    );
+    const status = clean.status;
+    const resource = saveResource(
+      {
+        type,
+        name,
+        purpose: before?.purpose || "",
+        notes: String(clean.notes ?? before?.notes ?? ""),
+        lifecycle:
+          status === "stopped"
+            ? "paused"
+            : status === "maintenance"
+              ? "planned"
+              : status === "running"
+                ? "active"
+                : before?.lifecycle || "active",
+        tags: before?.tags || [],
+        management_url: before?.management_url || "",
+        project_ids: before?.project_ids || [],
+        details,
+      },
+      id,
+      before?.revision,
+      "legacy-api",
+    );
+    if (type === "service" && typeof clean.domain === "string") {
+      const desired = new Set(
+        clean.domain
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+          .map(normalizeHostname),
+      );
+      for (const link of getRelations(resource.id).filter(
+        (l) => l.kind === "uses_hostname" && l.source_id === resource.id,
+      )) {
+        const target = getResource(link.target_id);
+        if (!target || !desired.has(String(target.details.domain)))
+          removeRelation(link.id);
+      }
+      for (const domain of desired) {
+        let target = listResources().find(
+          (r) => r.type === "domain" && r.details.domain === domain,
+        );
+        if (!target)
+          target = saveResource({
+            type: "domain",
+            name: domain,
+            purpose: "",
+            lifecycle: "active",
+            notes: "",
+            tags: [],
+            management_url: "",
+            project_ids: [],
+            details: { domain, dns_status: "inactive" },
+          });
+        addRelation({
+          source_id: resource.id,
+          target_id: target.id,
+          kind: "uses_hostname",
+          notes: "",
+        });
       }
     }
-  }
-
-  writeData(data);
+    if (type === "domain" && Array.isArray(clean.service_ids)) {
+      const desired = new Set(clean.service_ids);
+      for (const link of getRelations(resource.id).filter(
+        (l) => l.kind === "uses_hostname" && l.target_id === resource.id,
+      ))
+        if (!desired.has(link.source_id)) removeRelation(link.id);
+      for (const serviceId of desired)
+        addRelation({
+          source_id: serviceId,
+          target_id: resource.id,
+          kind: "uses_hostname",
+          notes: "",
+        });
+    }
+    return legacy(getResource(resource.id));
+  })();
 }
-
-// --- Domains ---
-export function getDomains() {
-  return readData().domains;
+function remove(id, type) {
+  const r = getResource(id);
+  if (r?.type !== type) return false;
+  return trashResource(id, r.revision);
 }
-
-export function getDomain(id) {
-  return readData().domains.find(d => d.id === id) || null;
-}
-
-export function createDomain(domain) {
-  const data = readData();
-  const d = {
-    id: uid(),
-    domain: '',
-    ip_address: '',
-    service_ids: [],
-    dns_provider: 'manual',
-    dns_status: 'inactive',
-    expiry_date: null,
-    ssl_status: 'unknown',
-    registrar: '',
-    notes: '',
-    created_at: now(),
-    updated_at: now(),
-    ...domain,
-  };
-  data.domains.push(d);
-  writeData(data);
-  return d;
-}
-
-export function updateDomain(id, patch) {
-  const data = readData();
-  const idx = data.domains.findIndex(d => d.id === id);
-  if (idx === -1) return null;
-  data.domains[idx] = { ...data.domains[idx], ...patch, updated_at: now() };
-  writeData(data);
-  return data.domains[idx];
-}
-
-export function deleteDomain(id) {
-  const data = readData();
-  const idx = data.domains.findIndex(d => d.id === id);
-  if (idx === -1) return false;
-  data.domains.splice(idx, 1);
-  writeData(data);
-  return true;
-}
-
-// --- Servers ---
-export function getServers() {
-  return readData().servers;
-}
-
-export function getServer(id) {
-  return readData().servers.find(s => s.id === id) || null;
-}
-
-export function createServer(server) {
-  const data = readData();
-  const s = {
-    id: uid(),
-    name: '',
-    provider: '',
-    ip: '',
-    ssh_port: 22,
-    region: '',
-    notes: '',
-    created_at: now(),
-    updated_at: now(),
-    ...server,
-  };
-  data.servers.push(s);
-  writeData(data);
-  return s;
-}
-
-export function updateServer(id, patch) {
-  const data = readData();
-  const idx = data.servers.findIndex(s => s.id === id);
-  if (idx === -1) return null;
-  data.servers[idx] = { ...data.servers[idx], ...patch, updated_at: now() };
-  writeData(data);
-  return data.servers[idx];
-}
-
-export function deleteServer(id) {
-  const data = readData();
-  const idx = data.servers.findIndex(s => s.id === id);
-  if (idx === -1) return false;
-  data.deployments = (data.deployments || []).filter(dep => dep.server_id !== id);
-  data.servers.splice(idx, 1);
-  writeData(data);
-  return true;
-}
-
-// --- Deployments ---
+export const getServices = () => list("service");
+export const getService = (id) => get(id, "service");
+export const createService = (input) => save("service", input);
+export const updateService = (id, input) => save("service", input, id);
+export const deleteService = (id) => remove(id, "service");
+export const getDomains = () => list("domain");
+export const getDomain = (id) => get(id, "domain");
+export const createDomain = (input) => save("domain", input);
+export const updateDomain = (id, input) => save("domain", input, id);
+export const deleteDomain = (id) => remove(id, "domain");
+export const getServers = () => list("host");
+export const getServer = (id) => get(id, "host");
+export const createServer = (input) => save("host", input);
+export const updateServer = (id, input) => save("host", input, id);
+export const deleteServer = (id) => remove(id, "host");
 export function getDeployments(serviceId) {
-  const list = readData().deployments;
-  return serviceId ? list.filter(dep => dep.service_id === serviceId) : list;
+  return deployments(serviceId).filter(
+    (d) => getResource(d.service_id) && getResource(d.server_id),
+  );
 }
-
 export function getDeployment(id) {
-  return readData().deployments.find(dep => dep.id === id) || null;
+  return getDeployments().find((d) => d.id === id) || null;
 }
-
-export function createDeployment(deployment) {
-  const data = readData();
-  const dep = {
-    id: uid(),
-    service_id: '',
-    server_id: '',
-    port: '',
-    protocol: 'https',
-    path: '',
-    container: '',
-    notes: '',
-    created_at: now(),
-    updated_at: now(),
-    ...deployment,
-  };
-  data.deployments.push(dep);
-  writeData(data);
-  return dep;
+export function createDeployment(input) {
+  return saveDeployment(
+    deploymentInputSchema.parse({
+      service_id: input.service_id,
+      server_id: input.server_id,
+      port: String(input.port || ""),
+      protocol: input.protocol || "https",
+      path: input.path || "",
+      container: input.container || "",
+      environment: input.environment || "production",
+      notes: input.notes || "",
+    }),
+  );
 }
-
 export function updateDeployment(id, patch) {
-  const data = readData();
-  const idx = data.deployments.findIndex(dep => dep.id === id);
-  if (idx === -1) return null;
-  data.deployments[idx] = { ...data.deployments[idx], ...patch, updated_at: now() };
-  writeData(data);
-  return data.deployments[idx];
+  const before = getDeployment(id);
+  if (!before) return null;
+  const { id: _, created_at, updated_at, ...input } = { ...before, ...patch };
+  return saveDeployment(deploymentInputSchema.parse(input), id);
 }
-
-export function deleteDeployment(id) {
-  const data = readData();
-  const idx = data.deployments.findIndex(dep => dep.id === id);
-  if (idx === -1) return false;
-  data.deployments.splice(idx, 1);
-  writeData(data);
-  return true;
+export const deleteDeployment = removeDeployment;
+export function getSettings() {
+  const settings = {};
+  let unavailable = false;
+  for (const row of sqlite.prepare("SELECT key,value FROM settings").all()) {
+    try {
+      settings[row.key] = decodeSetting(row.value);
+    } catch {
+      settings[row.key] = "";
+      unavailable = true;
+    }
+  }
+  return { ...settings, credential_unavailable: unavailable };
 }
-
-// --- Dashboard Stats ---
+export function updateSettings(patch) {
+  sqlite.transaction(() => {
+    for (const [key, value] of Object.entries(patch))
+      sqlite
+        .prepare(
+          "INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        )
+        .run(key, encodeSetting(key, value));
+  })();
+  return getSettings();
+}
 export function getDashboardStats() {
-  const data = readData();
-  const services = data.services || [];
-  const domains = data.domains || [];
-  const servers = data.servers || [];
-
-  const servicesRunning = services.filter(s => s.status === 'running').length;
-  const domainsActive = domains.filter(d => d.dns_status === 'active').length;
-
-  // 即将到期的域名（30天内）
-  const now = new Date();
-  const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const expiringDomains = domains.filter(d => {
-    if (!d.expiry_date) return false;
-    const expiry = new Date(d.expiry_date);
-    return expiry > now && expiry <= thirtyDaysLater;
-  });
-
-  // 异常状态
-  const alerts = [];
-
-  // 服务异常
-  services.filter(s => s.status === 'stopped').forEach(s => {
-    alerts.push({
-      type: 'service_down',
-      severity: 'error',
-      message: `服务 "${s.name}" 已停止`,
-      service_id: s.id,
-    });
-  });
-
-  // SSL 到期
-  domains.filter(d => d.ssl_status === 'expiring' || d.ssl_status === 'expired').forEach(d => {
-    alerts.push({
-      type: 'ssl_expiring',
-      severity: d.ssl_status === 'expired' ? 'error' : 'warning',
-      message: `域名 "${d.domain}" SSL 证书${d.ssl_status === 'expired' ? '已过期' : '即将到期'}`,
-      domain_id: d.id,
-    });
-  });
-
-  // 域名到期
-  expiringDomains.forEach(d => {
-    const daysLeft = Math.ceil((new Date(d.expiry_date) - now) / (1000 * 60 * 60 * 24));
-    alerts.push({
-      type: 'domain_expiring',
-      severity: daysLeft <= 7 ? 'error' : 'warning',
-      message: `域名 "${d.domain}" 还有 ${daysLeft} 天到期`,
-      domain_id: d.id,
-    });
-  });
-
+  const services = getServices(),
+    domains = getDomains(),
+    servers = getServers();
   return {
     services: {
       total: services.length,
-      running: servicesRunning,
+      running: services.filter((s) => s.status === "running").length,
     },
     domains: {
       total: domains.length,
-      active: domainsActive,
+      active: domains.filter((d) => d.dns_status === "active").length,
     },
-    servers: {
-      total: servers.length,
-    },
-    expiring_soon: expiringDomains.map(d => ({
-      domain: d.domain,
-      expiry_date: d.expiry_date,
-      days_left: Math.ceil((new Date(d.expiry_date) - now) / (1000 * 60 * 60 * 24)),
-    })),
-    alerts,
+    servers: { total: servers.length },
+    expiring_soon: [],
+    alerts: [],
   };
 }
-
-// --- Settings ---
-export function getSettings() {
-  return readData().settings;
-}
-
-export function updateSettings(patch) {
-  const data = readData();
-  data.settings = { ...data.settings, ...patch };
-  writeData(data);
-  return data.settings;
-}
-
-// --- Paths ---
-export { SCREENSHOTS_DIR, COVERS_DIR };

@@ -3,17 +3,24 @@ services:
     build: .
     container_name: domain-manage
     ports:
-      - "127.0.0.1:3080:3000"
+      - "127.0.0.1:${PANEL_PORT:-3080}:3000"
     environment:
       - PORT=3000
-      - CF_API_TOKEN=${CF_API_TOKEN:-}
+      - DATA_DIR=/app/data
       - AUTH_PASSWORD=${AUTH_PASSWORD:-}
+      - SETUP_TOKEN=${SETUP_TOKEN:-}
+      - CREDENTIAL_KEY=${CREDENTIAL_KEY:-}
+      - CF_API_TOKEN=${CF_API_TOKEN:-}
       - KOMARI_URL=${KOMARI_URL:-}
       - KOMARI_API_KEY=${KOMARI_API_KEY:-}
     volumes:
-      - domain-data:/app/data  # Persist data + screenshots
-      - ./public:/app/public   # Live-update frontend without rebuild
+      - domain-data:/app/data
     restart: unless-stopped
-
+    stop_grace_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 volumes:
   domain-data:
