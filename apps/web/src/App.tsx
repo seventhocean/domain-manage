@@ -128,7 +128,7 @@ function Shell() {
           </Link>
 
           {/* 核心主导航 Pills */}
-          <nav className="orbit-nav-links">
+          <nav className="orbit-nav-links" aria-label="主导航">
             <NavLink
               to="/"
               end
@@ -174,6 +174,8 @@ function Shell() {
             <button
               type="button"
               className="orbit-search-btn"
+              aria-label="搜索资产"
+              title="搜索资产"
               onClick={() => {
                 setSearch("");
                 setPalette(true);
@@ -187,6 +189,8 @@ function Shell() {
             <Button
               onClick={() => setCreate("service")}
               className="orbit-add-btn"
+              aria-label="录入资产"
+              title="录入资产"
             >
               <Plus size={14} />
               <span>录入资产</span>
@@ -195,6 +199,7 @@ function Shell() {
             <NavLink
               to="/settings"
               className="orbit-icon-btn"
+              aria-label="设置与数据"
               title="设置与数据"
             >
               <Settings size={16} />
@@ -203,6 +208,7 @@ function Shell() {
             <button
               type="button"
               className="orbit-icon-btn"
+              aria-label="退出登录"
               title="退出登录"
               onClick={async () => {
                 await api("/api/auth/logout", json("POST"));
@@ -241,7 +247,7 @@ function Shell() {
               element={
                 <Empty
                   title="页面不存在"
-                  description="从左侧导航重新选择，或使用全局搜索定位资源。"
+                  description="从导航重新选择，或使用全局搜索定位资源。"
                   action={
                     <Button asChild variant="secondary">
                       <Link to="/">返回总览</Link>
@@ -253,7 +259,7 @@ function Shell() {
           </Routes>
         </Suspense>
       </main>
-      <nav className="mobile-tabs">
+      <nav className="mobile-tabs" aria-label="移动导航">
         <NavLink to="/" end>
           <LayoutDashboard size={18} />
           总览
@@ -266,6 +272,10 @@ function Shell() {
         >
           <Boxes size={18} />
           资源
+        </NavLink>
+        <NavLink to="/projects">
+          <FolderKanban size={18} />
+          项目
         </NavLink>
         <NavLink to="/integrations">
           <RefreshCw size={18} />

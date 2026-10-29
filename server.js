@@ -51,6 +51,35 @@ import {
 } from "./komari.js";
 import { probeDomain, mapPool } from "./probe.js";
 
+const COVER_IMAGE_LIMIT = 5 * 1024 * 1024;
+const IMAGE_TYPES = new Map([
+  ["image/png", ".png"],
+  ["image/jpeg", ".jpg"],
+  ["image/jpg", ".jpg"],
+  ["image/webp", ".webp"],
+  ["image/x-icon", ".ico"],
+  ["image/vnd.microsoft.icon", ".ico"],
+  ["image/ico", ".ico"],
+]);
+const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".ico"]);
+
+function imageMatchesFormat(data, extension) {
+  switch (extension) {
+    case ".png":
+      return data.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    case ".jpg":
+    case ".jpeg":
+      return data[0] === 255 && data[1] === 216 && data[2] === 255;
+    case ".webp":
+      return data.toString("ascii", 0, 4) === "RIFF" &&
+        data.toString("ascii", 8, 12) === "WEBP";
+    case ".ico":
+      return data[0] === 0 && data[1] === 0 && data[2] === 1 && data[3] === 0;
+    default:
+      return false;
+  }
+}
+
 /** @param {{publicMiddleware?: (app: import('express').Express) => void, protectedRoutes?: (app: import('express').Express) => void, serveFrontend?: (req: import('express').Request, res: import('express').Response) => void}} options */
 export function createLegacyApp(options = {}) {
   const __dirname = process.cwd();
@@ -248,8 +277,16 @@ export function createLegacyApp(options = {}) {
   app.use(authRequired);
   options.protectedRoutes?.(app);
   app.use("/public", express.static(join(__dirname, "public")));
-  app.use("/screenshots", express.static(SCREENSHOTS_DIR));
-  app.use("/covers", express.static(COVERS_DIR));
+  function imageHeaders(req, res, next) {
+    // Also prevent previously uploaded active documents from executing.
+    if (!IMAGE_EXTENSIONS.has(extname(req.path).toLowerCase()))
+      return res.status(404).end();
+    res.set("X-Content-Type-Options", "nosniff");
+    res.set("Content-Security-Policy", "default-src 'none'; sandbox");
+    next();
+  }
+  app.use("/screenshots", imageHeaders, express.static(SCREENSHOTS_DIR));
+  app.use("/covers", imageHeaders, express.static(COVERS_DIR));
 
   // --- API: Auth ---
   app.get("/login", (req, res) => {
@@ -383,7 +420,7 @@ export function createLegacyApp(options = {}) {
     }),
     fileFilter: (req, file, cb) =>
       cb(null, /\.(png|jpe?g|webp|ico)$/i.test(file.originalname)),
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: COVER_IMAGE_LIMIT },
   });
 
   // --- API: Health ---
@@ -530,19 +567,7 @@ export function createLegacyApp(options = {}) {
         .status(400)
         .json({ error: "请选择 PNG、JPEG、WebP 或 ICO 图片" });
     const data = readFileSync(req.file.path);
-    const ext = extname(req.file.filename);
-    const valid =
-      ext === ".png"
-        ? data
-            .subarray(0, 8)
-            .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
-        : /^\.jpe?g$/.test(ext)
-          ? data[0] === 255 && data[1] === 216 && data[2] === 255
-          : ext === ".webp"
-            ? data.toString("ascii", 0, 4) === "RIFF" &&
-              data.toString("ascii", 8, 12) === "WEBP"
-            : data[0] === 0 && data[1] === 0 && data[2] === 1 && data[3] === 0;
-    if (!valid) {
+    if (!imageMatchesFormat(data, extname(req.file.filename).toLowerCase())) {
       unlinkSync(req.file.path);
       return res.status(400).json({ error: "图片内容与格式不匹配" });
     }
@@ -586,21 +611,41 @@ export function createLegacyApp(options = {}) {
   // Generic upload for clipboard screenshots or covers
   app.post(
     "/api/cmdb/upload",
-    coverUpload.single("file"),
+    (req, res, next) => {
+      coverUpload.single("file")(req, res, (error) => {
+        if (!error) return next();
+        return res.status(error.code === "LIMIT_FILE_SIZE" ? 413 : 400).json({
+          error: error.code === "LIMIT_FILE_SIZE"
+            ? "封面图片不能超过 5 MiB"
+            : "图片上传失败，请检查文件和上传字段",
+        });
+      });
+    },
     (req, res) => {
       if (req.file) {
-        return res.json({ url: `/covers/${req.file.filename}` });
+        return validateImage(req, res, () =>
+          res.json({ url: `/covers/${req.file.filename}` }),
+        );
       }
-      if (req.body?.base64 && typeof req.body.base64 === "string") {
-        const match = req.body.base64.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (match) {
-          const ext = `.${match[1].toLowerCase()}`;
-          const filename = `clip-${Date.now()}-${randomBytes(4).toString("hex")}${ext}`;
-          writeFileSync(join(COVERS_DIR, filename), Buffer.from(match[2], "base64"));
-          return res.json({ url: `/covers/${filename}` });
-        }
-      }
-      return res.status(400).json({ error: "未接收到图片数据" });
+      if (typeof req.body?.base64 !== "string")
+        return res.status(400).json({ error: "未接收到图片数据" });
+      const match = req.body.base64.match(/^data:([^;,]+);base64,([A-Za-z0-9+/]*={0,2})$/);
+      const extension = match && IMAGE_TYPES.get(match[1].toLowerCase());
+      if (!extension)
+        return res.status(400).json({ error: "请选择 PNG、JPEG、WebP 或 ICO 图片" });
+      const encoded = match[2];
+      if (encoded.length > Math.ceil(COVER_IMAGE_LIMIT / 3) * 4)
+        return res.status(413).json({ error: "封面图片不能超过 5 MiB" });
+      const data = Buffer.from(encoded, "base64");
+      if (!data.length || data.toString("base64") !== encoded)
+        return res.status(400).json({ error: "图片 Base64 数据无效" });
+      if (data.length > COVER_IMAGE_LIMIT)
+        return res.status(413).json({ error: "封面图片不能超过 5 MiB" });
+      if (!imageMatchesFormat(data, extension))
+        return res.status(400).json({ error: "图片内容与格式不匹配" });
+      const filename = `clip-${Date.now()}-${randomBytes(4).toString("hex")}${extension}`;
+      writeFileSync(join(COVERS_DIR, filename), data, { mode: 0o600, flag: "wx" });
+      return res.json({ url: `/covers/${filename}` });
     }
   );
 

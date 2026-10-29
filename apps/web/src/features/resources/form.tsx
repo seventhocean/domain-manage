@@ -2,36 +2,33 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Boxes,
   Camera,
-  Check,
   ChevronDown,
   ChevronUp,
   Globe2,
-  HardDrive,
-  Image as ImageIcon,
   KeyRound,
-  Layers,
-  Link as LinkIcon,
   Loader2,
-  Plus,
   Server,
   Sparkles,
   Trash2,
-  Upload,
   User,
   Zap,
 } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useId, useRef, useState } from "react";
+import { ZodError } from "zod";
 import {
+  lifecycleLabels,
   primaryResourceTypes,
   typeLabels,
+  type Lifecycle,
   type Resource,
   type ResourceInput,
   type ResourceType,
 } from "../../../../../packages/contracts";
-import { api, json, refresh } from "../../api";
+import { api, json, projectQuery, refresh } from "../../api";
 import { TagBadge } from "../../components/resource";
 import { Button } from "../../components/ui/button";
 import { Dialog } from "../../components/ui/dialog";
+import { resourceFormDefaults, resourceFormInput } from "./form-state";
 
 export const detailFields: Record<
   ResourceType,
@@ -121,33 +118,29 @@ export function ResourceForm({
   onClose: () => void;
   onSaved: (resource: Resource) => void;
 }) {
-  const [type, setType] = useState<ResourceType>(resource?.type || initialType);
-  const [name, setName] = useState(resource?.name || "");
-  const [address, setAddress] = useState(
-    resource?.management_url ||
-      String(resource?.details?.ip || resource?.details?.domain || ""),
-  );
-  const [purpose, setPurpose] = useState(resource?.purpose || "");
-  const [price, setPrice] = useState(String(resource?.details?.price || ""));
-  const [specs, setSpecs] = useState(
-    String(
-      resource?.details?.specs ||
-        (resource?.notes ? resource.notes.split("·")[1]?.trim() : "") ||
-        resource?.details?.provider ||
-        "",
-    ),
-  );
-  const [coverImage, setCoverImage] = useState(
-    String(resource?.details?.cover_image || ""),
-  );
-  const [tags, setTags] = useState<string[]>(resource?.tags || []);
+  const fieldId = useId();
+  const [defaults] = useState(() => resourceFormDefaults(resource, initialType));
+  const [type, setType] = useState<ResourceType>(defaults.type);
+  const [name, setName] = useState(defaults.name);
+  const [domain, setDomain] = useState(defaults.domain);
+  const [address, setAddress] = useState(defaults.address);
+  const [managementUrl, setManagementUrl] = useState(defaults.managementUrl);
+  const [purpose, setPurpose] = useState(defaults.purpose);
+  const [price, setPrice] = useState(defaults.price);
+  const [specs, setSpecs] = useState(defaults.specs);
+  const [coverImage, setCoverImage] = useState(defaults.coverImage);
+  const [tags, setTags] = useState<string[]>(defaults.tags);
   const [customTag, setCustomTag] = useState("");
-  const [notes, setNotes] = useState(resource?.notes || "");
+  const [notes, setNotes] = useState(defaults.notes);
+  const [lifecycle, setLifecycle] = useState<Lifecycle>(defaults.lifecycle);
+  const [projectIds, setProjectIds] = useState<string[]>(defaults.projectIds);
+  const projects = useQuery(projectQuery);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadPending = useRef(false);
 
   const save = useMutation({
     mutationFn: (data: ResourceInput) =>
@@ -169,6 +162,12 @@ export function ResourceForm({
 
   // Handle uploading an image file
   const handleUploadFile = async (file: File) => {
+    if (uploadPending.current || save.isPending) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("图片不能超过 5 MiB");
+      return;
+    }
+    uploadPending.current = true;
     setUploading(true);
     setErrorMessage("");
     try {
@@ -187,7 +186,9 @@ export function ResourceForm({
       const message = err instanceof Error ? err.message : "图片上传失败";
       setErrorMessage(message);
     } finally {
+      uploadPending.current = false;
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -225,53 +226,32 @@ export function ResourceForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    if (uploadPending.current || uploading) {
+      setErrorMessage("图片仍在上传，请完成后再保存");
+      return;
+    }
+    if (save.isPending) return;
+    if (!name.trim() && type !== "domain") {
       setErrorMessage("请填写资源或服务名称");
       return;
     }
 
-    let safeManagementUrl = "";
-    const cleanAddr = address.trim();
-
-    if (cleanAddr.startsWith("http://") || cleanAddr.startsWith("https://")) {
-      safeManagementUrl = cleanAddr;
-    } else if (type === "service" || type === "domain" || type === "account") {
-      if (cleanAddr && !cleanAddr.includes(" ")) {
-        safeManagementUrl = `https://${cleanAddr}`;
-      }
+    try {
+      const payload = resourceFormInput(
+        {
+          type, name, domain, address, managementUrl, purpose, price, specs,
+          coverImage, tags, notes, lifecycle, projectIds,
+        },
+        resource,
+      );
+      setErrorMessage("");
+      save.mutate(payload);
+    } catch (error) {
+      const message = error instanceof ZodError
+        ? error.issues.map((issue) => issue.message).join("；")
+        : error instanceof Error ? error.message : "请检查填写内容";
+      setErrorMessage(message);
     }
-
-    const details: Record<string, unknown> = {
-      ...(resource?.details || {}),
-      price: price.trim() || undefined,
-      cover_image: coverImage || undefined,
-      specs: specs.trim() || undefined,
-    };
-
-    if (type === "host") {
-      details.ip = cleanAddr;
-      if (specs.trim()) details.provider = specs.trim();
-    } else if (type === "domain") {
-      details.domain = cleanAddr;
-    } else if (type === "service") {
-      details.domain = cleanAddr;
-    }
-
-    const finalNotes = notes.trim() || (specs.trim() ? `配置: ${specs.trim()}` : "");
-
-    const payload: ResourceInput = {
-      type,
-      name: name.trim(),
-      purpose: purpose.trim(),
-      lifecycle: resource?.lifecycle || "active",
-      notes: finalNotes,
-      tags,
-      management_url: safeManagementUrl,
-      project_ids: resource?.project_ids || [],
-      details,
-    };
-
-    save.mutate(payload);
   };
 
   return (
@@ -353,7 +333,7 @@ export function ResourceForm({
         {/* 2. 上下文自适应核心表单区 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[11px] text-muted mb-1 font-medium">
+            <label htmlFor={`${fieldId}-name`} className="block text-[11px] text-muted mb-1 font-medium">
               {type === "host"
                 ? "主机名称"
                 : type === "domain"
@@ -363,12 +343,16 @@ export function ResourceForm({
                     : type === "account"
                       ? "平台/账号名称"
                       : "订阅名称"}{" "}
-              <span className="text-[#F6821F]">*</span>
+              <span aria-hidden="true" className="text-[#F6821F]">*</span>
             </label>
             <input
+              id={`${fieldId}-name`}
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={type === "domain" ? domain : name}
+              onChange={(e) => {
+                if (type === "domain") setDomain(e.target.value);
+                else setName(e.target.value);
+              }}
               placeholder={
                 type === "host"
                   ? "例如：Wawo-HK、炭云美西"
@@ -386,7 +370,7 @@ export function ResourceForm({
           </div>
 
           <div>
-            <label className="block text-[11px] text-muted mb-1 font-medium">
+            <label htmlFor={`${fieldId}-address`} className="block text-[11px] text-muted mb-1 font-medium">
               {type === "host"
                 ? "公网 IP 地址"
                 : type === "domain"
@@ -394,10 +378,11 @@ export function ResourceForm({
                   : type === "service"
                     ? "访问链接 / 域名"
                     : type === "account"
-                      ? "主页链接 / 用户名"
+                      ? "主页链接 / 控制台 URL"
                       : "API 接口地址 / 控制台 URL"}
             </label>
             <input
+              id={`${fieldId}-address`}
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -433,12 +418,12 @@ export function ResourceForm({
               {type === "host"
                 ? "硬件配置 / 地区备注"
                 : type === "domain"
-                  ? "DNS 托管商"
+                  ? "域名补充说明"
                   : type === "service"
-                    ? "关联宿主机"
+                    ? "部署备注（关联在详情页设置）"
                     : type === "account"
-                      ? "账号唯一标识 / UID"
-                      : "额度 / 套餐信息"}
+                      ? "账号补充说明"
+                      : "额度 / 套餐备注"}
             </label>
             <input
               type="text"
@@ -448,7 +433,7 @@ export function ResourceForm({
                 type === "host"
                   ? "例如：Xeon E3 · 1C 0.5G · 香港 CN2"
                   : type === "domain"
-                    ? "例如：Cloudflare DNS"
+                    ? "例如：个人博客主域名"
                     : type === "service"
                       ? "例如：TYyun-HK"
                       : "例如：100万 Token/月"
@@ -569,7 +554,7 @@ export function ResourceForm({
                     <span>截屏后在此按 ⌘V 粘贴截图，或点击选择图片</span>
                   </div>
                   <span className="text-[10px] text-muted">
-                    无需上传图床，直接粘贴剪贴板图片即可设为封面
+                    支持 PNG、JPEG、WebP、ICO，最大 5 MiB
                   </span>
                 </>
               )}
@@ -580,7 +565,8 @@ export function ResourceForm({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/webp,image/x-icon,image/vnd.microsoft.icon,.png,.jpg,.jpeg,.webp,.ico"
+            disabled={uploading || save.isPending}
             style={{ display: "none" }}
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -603,6 +589,55 @@ export function ResourceForm({
           />
         </div>
 
+        <div className="space-y-3 rounded-xl border border-white/5 bg-[#0F1118] p-3">
+          <div>
+            <label htmlFor={`${fieldId}-lifecycle`} className="block text-[11px] text-muted font-medium">
+              生命周期
+            </label>
+            <select
+              id={`${fieldId}-lifecycle`}
+              value={lifecycle}
+              onChange={(e) => setLifecycle(e.target.value as Lifecycle)}
+              className="mt-1 block h-9 w-full rounded-lg border border-white/10 bg-[#0A0C11] px-3 text-xs text-ink"
+            >
+              {Object.entries(lifecycleLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+          <fieldset>
+            <legend className="mb-1.5 text-[11px] text-muted font-medium">所属项目</legend>
+            {projects.isPending ? (
+              <p className="text-xs text-muted">正在加载项目…</p>
+            ) : projects.error ? (
+              <div className="text-xs text-red-300" role="alert">
+                项目加载失败，已有归属会保留。
+                <button type="button" onClick={() => projects.refetch()} className="ml-2 underline">重试</button>
+              </div>
+            ) : projects.data?.length ? (
+              <div className="flex max-h-32 flex-wrap gap-x-4 gap-y-2 overflow-y-auto">
+                {projects.data.map((project) => (
+                  <label key={project.id} className="flex items-center gap-1.5 text-xs text-ink">
+                    <input
+                      type="checkbox"
+                      checked={projectIds.includes(project.id)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setProjectIds((previous) => checked
+                          ? [...previous, project.id]
+                          : previous.filter((id) => id !== project.id));
+                      }}
+                    />
+                    {project.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted">还没有项目，可在项目页创建后回来关联。</p>
+            )}
+          </fieldset>
+        </div>
+
         {/* 6. 高级选项折叠 */}
         <div>
           <button
@@ -612,16 +647,40 @@ export function ResourceForm({
           >
             {showAdvanced ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
             <span>
-              {showAdvanced ? "收起长备注" : "展开高级设置（配置命令、长备忘）"}
+              {showAdvanced ? "收起高级设置" : "展开高级设置（管理地址、显示名称与长备注）"}
             </span>
           </button>
 
           {showAdvanced && (
             <div className="mt-2 space-y-2 pt-2 border-t border-white/5">
+              {(type === "host" || type === "domain") && (
+                <label htmlFor={`${fieldId}-management`} className="block text-[11px] text-muted font-medium">
+                  管理后台 URL
+                  <input
+                    id={`${fieldId}-management`}
+                    value={managementUrl}
+                    onChange={(e) => setManagementUrl(e.target.value)}
+                    placeholder="https://console.example.com"
+                    className="mt-1 block h-9 w-full rounded-lg border border-white/10 bg-[#0F1118] px-3 text-xs text-ink font-mono"
+                  />
+                </label>
+              )}
+              {type === "domain" && (
+                <label htmlFor={`${fieldId}-alias`} className="block text-[11px] text-muted font-medium">
+                  显示名称 / 别名（可选）
+                  <input
+                    id={`${fieldId}-alias`}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="留空时使用完整域名"
+                    className="mt-1 block h-9 w-full rounded-lg border border-white/10 bg-[#0F1118] px-3 text-xs text-ink"
+                  />
+                </label>
+              )}
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="记录购买时间、续费提醒、SSH 命令、Token 密钥等..."
+                placeholder="记录购买时间、续费提醒与使用说明；请勿填写口令或密钥"
                 rows={3}
                 className="w-full p-2.5 text-xs bg-[#0F1118] border border-white/10 rounded-lg text-ink focus:border-[#F6821F] focus:outline-none"
               />
@@ -636,10 +695,10 @@ export function ResourceForm({
           </Button>
           <Button
             type="submit"
-            disabled={save.isPending}
+            disabled={save.isPending || uploading}
             className="bg-[#F6821F] hover:bg-[#FA8C16] text-white font-medium px-5"
           >
-            {save.isPending ? "保存中..." : resource ? "保存修改" : "立即创建"}
+            {uploading ? "图片上传中…" : save.isPending ? "保存中..." : resource ? "保存修改" : "立即创建"}
           </Button>
         </div>
       </form>

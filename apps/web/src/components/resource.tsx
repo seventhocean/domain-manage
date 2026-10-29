@@ -33,6 +33,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Resource, ResourceType } from "../../../../packages/contracts";
 import { lifecycleLabels, typeLabels } from "../../../../packages/contracts";
+import { flagForRegion, getCardFacts, getSshConnection } from "./resource-data";
 
 const typeDefaultIcons = {
   domain: Globe2,
@@ -496,16 +497,8 @@ export function getSceneCover(resource: Resource): string {
   return "/art/cover-ops-v1.png";
 }
 
-export function getFlagEmoji(text: string): string {
-  if (/hk|hong\s*kong|香港/i.test(text)) return "🇭🇰";
-  if (/cn|china|广州|上海|北京|国内|阿里|腾讯|火山/i.test(text)) return "🇨🇳";
-  if (/us|los|america|美国|洛杉矶|圣何塞/i.test(text)) return "🇺🇸";
-  if (/jp|japan|东京|日本/i.test(text)) return "🇯🇵";
-  if (/sg|singapore|新加坡/i.test(text)) return "🇸🇬";
-  if (/tw|taiwan|台湾/i.test(text)) return "🇹🇼";
-  if (/kr|korea|韩国/i.test(text)) return "🇰🇷";
-  if (/de|germany|德国|eu\b|欧洲/i.test(text)) return "🇪🇺";
-  return "🌐";
+export function getFlagEmoji(region: string): string {
+  return flagForRegion(region);
 }
 
 export function ResourceBadge({
@@ -629,9 +622,10 @@ export interface CardTheme {
   providerLabel?: string;
   brandTag?: string;
   specs?: string;
+  proxyLabel?: string;
 }
 
-export function getCardTheme(resource: Resource): CardTheme {
+function getCardPalette(resource: Resource): Pick<CardTheme, "gradient" | "accent" | "glowColor"> {
   const text = `${resource.name} ${resource.purpose} ${resource.notes || ""} ${JSON.stringify(resource.details || {})}`.toLowerCase();
 
   // 1. 社交与内容平台
@@ -641,8 +635,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #3D0811 0%, #881326 45%, #FF2442 100%)",
         accent: "#FF2442",
         glowColor: "rgba(255, 36, 66, 0.4)",
-        brandTag: "小红书",
-        providerLabel: "生活分享与自媒体",
       };
     }
     if (/抖音|tiktok/i.test(text)) {
@@ -650,8 +642,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #090A10 0%, #161823 45%, #1F1B3E 80%, #312E81 100%)",
         accent: "#FE2C55",
         glowColor: "rgba(254, 44, 85, 0.4)",
-        brandTag: "抖音",
-        providerLabel: "短视频与直播平台",
       };
     }
     if (/推特|twitter|\bx\b/i.test(text)) {
@@ -659,8 +649,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #0A0A0C 0%, #18181D 55%, #272730 100%)",
         accent: "#FFFFFF",
         glowColor: "rgba(255, 255, 255, 0.2)",
-        brandTag: "X / Twitter",
-        providerLabel: "全球即时资讯",
       };
     }
     if (/nodeseek/i.test(text)) {
@@ -668,8 +656,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #1C1917 0%, #431407 50%, #9A3412 80%, #EA580C 100%)",
         accent: "#F97316",
         glowColor: "rgba(249, 115, 22, 0.4)",
-        brandTag: "NodeSeek",
-        providerLabel: "极客社区与 VPS 交流",
       };
     }
     if (/github/i.test(text)) {
@@ -677,41 +663,31 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #4338CA 100%)",
         accent: "#818CF8",
         glowColor: "rgba(129, 140, 248, 0.4)",
-        brandTag: "GitHub",
-        providerLabel: "开源代码托管平台",
       };
     }
     return {
       gradient: "linear-gradient(135deg, #1E1B4B 0%, #3730A3 50%, #4F46E5 100%)",
       accent: "#6366F1",
       glowColor: "rgba(99, 102, 241, 0.35)",
-      brandTag: "平台账号",
-      providerLabel: "数字账号矩阵",
     };
   }
 
-  // 2. 域名资产 (Cloudflare)
+  // 2. 域名配色
   if (resource.type === "domain" || /domain|cloudflare|zone|dns/i.test(text)) {
     return {
       gradient: "linear-gradient(135deg, #2D1405 0%, #7C2D12 45%, #C2410C 80%, #F97316 100%)",
       accent: "#FB923C",
       glowColor: "rgba(249, 115, 22, 0.4)",
-      brandTag: "Cloudflare DNS",
-      providerLabel: "智能 CDN & 解析托管",
     };
   }
 
   // 3. 云服务器 / VPS
   if (resource.type === "host" || /vps|server|host|节点|主机/i.test(text)) {
-    const specs = resource.notes ? resource.notes.split("·")[1]?.trim() : "";
     if (/wawo/i.test(text)) {
       return {
         gradient: "linear-gradient(135deg, #2A0845 0%, #581C87 45%, #7E22CE 80%, #A21CAF 100%)",
         accent: "#C084FC",
         glowColor: "rgba(192, 132, 252, 0.4)",
-        flag: "🇭🇰",
-        providerLabel: "Wawo Cloud · 香港 CN2",
-        specs: specs || "Xeon E3 · 1C 0.5G",
       };
     }
     if (/tyyun|炭云/i.test(text)) {
@@ -720,18 +696,12 @@ export function getCardTheme(resource: Resource): CardTheme {
           gradient: "linear-gradient(135deg, #0B192C 0%, #1E3E62 50%, #1E40AF 85%, #3B82F6 100%)",
           accent: "#60A5FA",
           glowColor: "rgba(96, 165, 250, 0.4)",
-          flag: "🇺🇸",
-          providerLabel: "炭云 TYyun · 美西 4837",
-          specs: specs || "Xeon Platinum · 4C 4G",
         };
       }
       return {
         gradient: "linear-gradient(135deg, #022C22 0%, #064E3B 50%, #047857 85%, #10B981 100%)",
         accent: "#34D399",
         glowColor: "rgba(52, 211, 153, 0.4)",
-        flag: "🇭🇰",
-        providerLabel: "炭云 TYyun · 香港主力机",
-        specs: specs || "Xeon Platinum · 4C 8G",
       };
     }
     if (/腾讯云|tencent/i.test(text)) {
@@ -739,9 +709,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #082F49 0%, #0369A1 50%, #0284C7 85%, #38BDF8 100%)",
         accent: "#38BDF8",
         glowColor: "rgba(56, 189, 248, 0.4)",
-        flag: "🇨🇳",
-        providerLabel: "腾讯云 · 上海轻量应用",
-        specs: specs || "Xeon Platinum · 4C 4G",
       };
     }
     if (/火山|byte|字节/i.test(text)) {
@@ -749,9 +716,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #042F2E 0%, #0F766E 50%, #0D9488 85%, #14B8A6 100%)",
         accent: "#2DD4BF",
         glowColor: "rgba(45, 212, 191, 0.4)",
-        flag: "🇨🇳",
-        providerLabel: "火山引擎 · 广州算力节点",
-        specs: specs || "Xeon Platinum · 4C 8G",
       };
     }
     if (/阿里云|aliyun/i.test(text)) {
@@ -759,20 +723,13 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #451A03 0%, #92400E 50%, #B45309 85%, #F59E0B 100%)",
         accent: "#FBBF24",
         glowColor: "rgba(251, 191, 36, 0.4)",
-        flag: "🇨🇳",
-        providerLabel: "阿里云 · 广州可用区",
-        specs: specs || "云服务器 ECS · 2C 2G",
       };
     }
     if (/vmiss/i.test(text)) {
-      const isUS = /los|美西|美国/i.test(text);
       return {
         gradient: "linear-gradient(135deg, #4C0519 0%, #881337 50%, #BE123C 85%, #F43F5E 100%)",
         accent: "#FB7185",
         glowColor: "rgba(251, 113, 133, 0.4)",
-        flag: isUS ? "🇺🇸" : "🇭🇰",
-        providerLabel: isUS ? "Vmiss · 洛杉矶 BGP 优化" : "Vmiss · 香港 BGP 优化",
-        specs: specs || "EPYC / 1C 1G · 300G",
       };
     }
     if (/vmshell/i.test(text)) {
@@ -780,19 +737,12 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #3B0764 0%, #581C87 50%, #7E22CE 85%, #A855F7 100%)",
         accent: "#C084FC",
         glowColor: "rgba(192, 132, 252, 0.4)",
-        flag: "🇭🇰",
-        providerLabel: "VmShell · 香港 CMI 高防专线",
-        specs: specs || "EPYC-Rome · 1C 1G · 1TB",
       };
     }
-    const flag = getFlagEmoji(text);
     return {
       gradient: "linear-gradient(135deg, #111827 0%, #1F2937 50%, #374151 100%)",
       accent: "#9CA3AF",
       glowColor: "rgba(156, 163, 175, 0.25)",
-      flag,
-      providerLabel: "云服务器 / VPS",
-      specs: specs || "云主机节点",
     };
   }
 
@@ -803,8 +753,6 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #022C22 0%, #047857 45%, #059669 80%, #10B981 100%)",
         accent: "#34D399",
         glowColor: "rgba(52, 211, 153, 0.4)",
-        brandTag: "Komari 监控",
-        providerLabel: "多节点探针与健康看板",
       };
     }
     if (/ai|商店|winter/i.test(text)) {
@@ -812,27 +760,26 @@ export function getCardTheme(resource: Resource): CardTheme {
         gradient: "linear-gradient(135deg, #311042 0%, #701A75 45%, #9D174D 80%, #DB2777 100%)",
         accent: "#F472B6",
         glowColor: "rgba(244, 114, 182, 0.4)",
-        brandTag: "Winter AI",
-        providerLabel: "AI 商业商店与分发系统",
       };
     }
     return {
       gradient: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)",
       accent: "#818CF8",
       glowColor: "rgba(129, 140, 248, 0.35)",
-      brandTag: "在线服务",
-      providerLabel: "自建系统",
     };
   }
 
-  // 5. 商业订阅与 API
+  // 5. 其他类型的中性暖色
   return {
     gradient: "linear-gradient(135deg, #1C1917 0%, #292524 50%, #44403C 100%)",
     accent: "#F59E0B",
     glowColor: "rgba(245, 158, 11, 0.35)",
-    brandTag: "商业订阅",
-    providerLabel: "API 与模型服务",
   };
+}
+
+export function getCardTheme(resource: Resource): CardTheme {
+  // Appearance can be inferred; provider, location and specifications cannot.
+  return { ...getCardPalette(resource), ...getCardFacts(resource) };
 }
 
 export function CopyIconButton({
@@ -863,24 +810,35 @@ export function CopyIconButton({
   );
 }
 
-export function SshCopyButton({ ip }: { ip: string }) {
+export function SshCopyButton({ ip, port }: { ip: string; port?: unknown }) {
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
+  const connection = getSshConnection(ip, port);
+  if (!connection) return null;
+  const description = [
+    connection.multipleAddresses ? `使用首个有效 IP：${connection.address}` : connection.address,
+    connection.defaultPort ? "未记录端口，使用默认 22" : `端口 ${connection.port}`,
+  ].join("；");
   return (
     <button
       type="button"
       className="bento-copy-btn"
-      title={`复制 SSH 命令: ssh root@${ip}`}
+      title={error ? `复制失败，请手动复制：${connection.command}` : `复制 SSH 命令（${description}）：${connection.command}`}
+      aria-label={`复制 SSH 命令，${description}`}
       onClick={async (e) => {
         e.stopPropagation();
+        setError(false);
         try {
-          await navigator.clipboard.writeText(`ssh root@${ip}`);
+          await navigator.clipboard.writeText(connection.command);
           setCopied(true);
           setTimeout(() => setCopied(false), 1600);
-        } catch {}
+        } catch {
+          setError(true);
+        }
       }}
     >
       <Terminal size={11} />
-      <span>{copied ? "已复制" : "SSH"}</span>
+      <span>{copied ? "已复制" : error ? "复制失败" : connection.multipleAddresses ? "SSH · 首个 IP" : "SSH"}</span>
     </button>
   );
 }
@@ -903,7 +861,7 @@ export function ShowcaseCard({
 
   const price = String(resource.details?.price || "");
   const ip = String(resource.details?.ip || resource.details?.address || "");
-  const flag = theme.flag || (resource.type === "host" ? getFlagEmoji(resource.name) : "");
+  const flag = theme.flag;
 
   return (
     <article className="bento-card group">
@@ -939,9 +897,9 @@ export function ShowcaseCard({
               </h3>
               {theme.specs ? (
                 <span className="bento-hero-subspecs">{theme.specs}</span>
-              ) : (
+              ) : theme.providerLabel ? (
                 <span className="bento-hero-provider">{theme.providerLabel}</span>
-              )}
+              ) : null}
             </div>
           </div>
         )}
@@ -950,8 +908,8 @@ export function ShowcaseCard({
         <div className="bento-hero-badges">
           <div className="bento-hero-badge-left">
             {flag && <span className="bento-flag-pill">{flag}</span>}
-            <span className="bento-provider-pill">
-              {theme.providerLabel?.split("·")[0]?.trim() || typeLabels[resource.type]}
+            <span className="bento-provider-pill" title={theme.providerLabel}>
+              {theme.providerLabel || typeLabels[resource.type]}
             </span>
           </div>
 
@@ -961,9 +919,9 @@ export function ShowcaseCard({
                 {price}
               </span>
             )}
-            {resource.type === "domain" && (
+            {theme.proxyLabel && (
               <span className="bento-cf-pill">
-                <Cloud size={11} /> 代理
+                <Cloud size={11} /> {theme.proxyLabel}
               </span>
             )}
           </div>
@@ -996,7 +954,7 @@ export function ShowcaseCard({
             </span>
             <div className="bento-param-actions">
               <CopyIconButton value={ip || url} label="复制" />
-              {resource.type === "host" && ip && <SshCopyButton ip={ip} />}
+              {resource.type === "host" && ip && <SshCopyButton ip={ip} port={resource.details.ssh_port} />}
             </div>
           </div>
         )}

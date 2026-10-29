@@ -112,6 +112,14 @@ npm start
 
 本地与 Docker 的数据目录是独立的；不要以本机 data/ 的内容推断 Docker 数据卷中的内容。验证数据修改时使用独立 DATA_DIR。
 
+针对资源表单、卡片信息、SSH 命令和图片上传的回归检查：
+
+```bash
+node --import tsx scripts/check-review-regressions.mjs
+```
+
+该脚本自动创建临时数据库和仅绑定回环地址的随机端口服务，结束后关闭服务并删除临时数据，不读取或修改现有台账。
+
 ## 文档与维护
 
 - [PRD.md](PRD.md)：完整目标、阶段与验收场景。
